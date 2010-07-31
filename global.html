@@ -1,0 +1,409 @@
+<html>
+<head>
+	<script src="jquery-1.4.2.min.js" type="text/javascript"></script>
+	<script src="sha1.js" type="text/javascript"></script>
+	<script src="avian_oauth.js" type="text/javascript"></script>
+	<script src="avianlib.js" type="text/javascript"></script>
+	<script type="text/javascript">
+		var maxTweetsDisplayed = 50;
+
+		var OAuth = new OAuth({oauth_consumer_secret:'QeVR9whib2JiVImPmOlVt8Kj7MHmmxxxYvhlO3TNcI',oauth_consumer_key:'IIwrpBcFc5yoJcITSavCA', oauth_token: safari.extension.secureSettings.oauth_token, oauth_token_secret: safari.extension.secureSettings.oauth_token_secret, log_to_console:false});
+
+		var Avian = new Avian({OAuth:OAuth,log_to_console:true,responses:safari.extension.settings.responses,metadata:safari.extension.settings.metadata,unreadTweets:safari.extension.settings.unreadTweets,unreadMentions:safari.extension.settings.unreadMentions,unreadDMs:safari.extension.settings.unreadDMs});
+		
+		var updateIntervalKey;
+		
+		safari.application.addEventListener("message",captureMessage,false);
+	    safari.application.addEventListener("validate", captureValidate, false);
+		safari.extension.settings.addEventListener("change", settingChanged, false);
+
+		function settingChanged(event) {
+			if(event.key == "updateInterval" && Avian.checkAuthStatus() == true) {
+				setUpdateInterval();
+			}
+		}
+
+		function captureMessage(event) {
+			if (event.name == 'aviansafari' && event.message == 'confirmed') {
+				for (var i=0;i < safari.extension.bars.length;i++) {
+					$(safari.extension.bars[i].contentWindow.document.getElementById('auth-status')).html('Fetching final access token. Please wait...');
+				}
+				function success(data) {
+					safari.extension.secureSettings.oauth_token = data.oauth_token;
+					safari.extension.secureSettings.oauth_token_secret = data.oauth_token_secret;
+					//store other two settings?
+					console.log('successfully authenticated access token');
+					//going to active may not always work. maybe dispatch to all pages?
+					event.target.page.dispatchMessage('aviansafari','success');
+					for(var i=0;i < safari.extension.bars.length;i++) {
+						safari.extension.bars[i].contentWindow.checkAuthAndStatus();
+					}
+				}
+				function error(data) {
+					for (var i=0;i < safari.extension.bars.length;i++) {
+						$(safari.extension.bars[i].contentWindow.document.getElementById('auth-status')).html('An error occurred fetching the token. Click here to try again.');
+					}
+				}
+				Avian.getAccessToken(success,error);
+			}
+			if (event.name == 'aviansafari-viewthread') {
+				Avian.getThread(event.message,getThreadsuccess);
+				function getThreadsuccess(obj) {
+					event.target.page.dispatchMessage('aviansafari',obj);
+				}
+			}
+		}
+		
+		function captureValidate(event) {
+			if(event.command != 'aviansafari-toggle') {
+				return;
+			}
+			updateBadge();
+		}
+
+		function setUpdateInterval(minutes,reset) {
+			if(updateIntervalKey != undefined && typeof reset == 'undefined') { return false; }
+			if(typeof minutes == 'undefined') { minutes = safari.extension.settings.getItem("updateInterval"); }
+			clearInterval(updateIntervalKey);
+			updateIntervalKey = safari.extension.globalPage.contentWindow.setInterval(updateData, minutes * 60 * 1000);
+			return true;
+		}
+		
+		function updateData() {
+			updateTimeline();
+			updateMentions();
+			updateDirectMessages();
+			updateSentDirectMessages();
+		}
+
+		function saveObjects() {
+			//responses
+			safari.extension.settings.responses = Avian.responses;
+			//metadata
+			safari.extension.settings.metadata = Avian.metadata;
+			safari.extension.settings.unreadTweets = Avian.unreadTweets;
+			safari.extension.settings.unreadMentions = Avian.unreadMentions;
+			safari.extension.settings.unreadDMs = Avian.unreadDMs;
+		}
+
+		function updateTimeline() {
+			function success(data) {
+				if(Avian.unreadTweets > maxTweetsDisplayed) {
+					Avian.unreadTweets = maxTweetsDisplayed;
+				}
+				updateBadge();
+				populateOrUpdateTweetBars(data);
+			}
+			Avian.getHomeTimeline({},success);
+		}
+
+		function updateMentions() {
+			function success(data) {
+				if(Avian.unreadMentions > maxTweetsDisplayed) {
+					Avian.unreadMentions = maxTweetsDisplayed;
+				}
+				updateBadge();
+				populateOrUpdateMentionsBars(data);
+			}
+			Avian.getMentions({},success);
+		}
+		
+		function updateDirectMessages() {
+			function success(data) {
+				if(Avian.unreadDMs > maxTweetsDisplayed) {
+					Avian.unreadDMs = maxTweetsDisplayed;
+				}
+				updateBadge();
+				populateOrUpdateDMBars(data);
+			}
+			Avian.getDirectMessages('received',{},success);
+		}
+
+		function updateSentDirectMessages() {
+			function success(data) {
+				if(Avian.unreadDMs > maxTweetsDisplayed) {
+					Avian.unreadDMs = maxTweetsDisplayed;
+				}
+				updateBadge();
+				populateOrUpdateSentDMBars(data);
+			}
+			Avian.getDirectMessages('sent',{},success);
+		}
+
+		function markTweetAsRead(status_id) {
+			Avian.markTweetAsRead(status_id);
+			for (var i=0; i < safari.extension.bars.length; i++) {
+				bar = safari.extension.bars[i];
+				//timeline
+				var timeline = bar.contentWindow.document.querySelector('.face.timeline');
+				$(timeline).find('[status_id="'+status_id+'"]').find('.unread').remove();
+				//mentions
+				var mentions = bar.contentWindow.document.querySelector('.face.mentions');
+				$(mentions).find('[status_id="'+status_id+'"]').find('.unread').remove();
+			}
+			updateBadge();
+		}
+
+		function markDMAsRead(status_id) {
+			Avian.markDMAsRead(status_id);
+			for (var i=0; i < safari.extension.bars.length; i++) {
+				bar = safari.extension.bars[i];
+				var direct_messages = bar.contentWindow.document.querySelector('.face.direct-messages');
+				$(direct_messages).find('[status_id="'+status_id+'"]').find('.unread').remove();
+			}
+			updateBadge();
+		}
+		
+		function markAllAsRead() {
+			Avian.markAllTweetsAsRead();
+			Avian.markAllDMsAsRead();
+			for (var i=0; i < safari.extension.bars.length; i++) {
+				bar = safari.extension.bars[i];
+				var timeline = bar.contentWindow.document.querySelector('.face');
+				$(timeline).find('.tweet .unread').remove();
+			}
+			updateBadge();
+		}
+		
+		function updateBadge() {
+			for(var i=0;i < safari.extension.toolbarItems.length;i++) {
+				safari.extension.toolbarItems[i].badge = Avian.unreadTweets+Avian.unreadMentions+Avian.unreadDMs;
+				safari.extension.toolbarItems[i].toolTip = Avian.unreadTweets+' unread Tweets\n'+Avian.unreadMentions+' unread Mentions\n'+Avian.unreadDMs+' unread DMs';
+			}
+			saveObjects();
+		}
+
+		function populateOrUpdateTweetBars(data){
+			var tweetBody = generateTweetBody(data);
+			for (var k=0; k < safari.extension.bars.length; k++) {
+				bar = safari.extension.bars[k];
+				var container = bar.contentWindow.document.querySelector('.face.timeline');
+				var tweetsLoaded = bar.contentWindow.tweetsLoaded;
+				//we need to check if the bar already has tweets in it. if it does, go ahead and add the new ones
+				//if it doesn't, go get the entire home_timeline and prepend that instead
+				if(tweetsLoaded) {
+					$(tweetBody).prependTo($(container));
+					//trim out old tweets to keep down memory overhead, et cetera
+					//should probably be a configurable parameter
+					while($(container).find('.tweet').length > maxTweetsDisplayed) { $(container).find('.tweet').last().remove(); }
+				} else {
+					populateTweetBar(bar);
+				}
+			}
+		}
+		
+		function populateTweetBar(bar) {
+			var container = bar.contentWindow.document.querySelector('.face.timeline');
+			var initialLoad = bar.contentWindow.document.querySelector('#initial-load');
+			$(initialLoad).hide();
+			var tweetBody = generateTweetBody(Avian.responses.home_timeline);
+			$(tweetBody).prependTo($(container));
+			bar.contentWindow.tweetsLoaded = true;
+		}
+
+		function populateOrUpdateMentionsBars(data){
+			var tweetBody = generateTweetBody(data);
+			for (var k=0; k < safari.extension.bars.length; k++) {
+				bar = safari.extension.bars[k];
+				var container = bar.contentWindow.document.querySelector('.face.mentions');
+				var mentionsLoaded = bar.contentWindow.mentionsLoaded;
+				//we need to check if the bar already has tweets in it. if it does, go ahead and add the new ones
+				//if it doesn't, go get the entire home_timeline and prepend that instead
+				if(mentionsLoaded) {
+					$(tweetBody).prependTo($(container));
+					//trim out old tweets to keep down memory overhead, et cetera
+					//should probably be a configurable parameter
+					while($(container).find('.tweet').length > maxTweetsDisplayed) { $(container).find('.tweet').last().remove(); }
+				} else {
+					populateMentionsBar(bar);
+				}
+			}
+		}
+		
+		function populateMentionsBar(bar) {
+			var container = bar.contentWindow.document.querySelector('.face.mentions');
+			var initialLoad = bar.contentWindow.document.querySelector('#initial-load');
+			$(initialLoad).hide();
+			var tweetBody = generateTweetBody(Avian.responses.mentions);
+			$(tweetBody).prependTo($(container));
+			bar.contentWindow.mentionsLoaded = true;
+		}
+
+		function populateOrUpdateDMBars(data){
+			var tweetBody = generateTweetBody(data);
+			for (var k=0; k < safari.extension.bars.length; k++) {
+				bar = safari.extension.bars[k];
+				var container = bar.contentWindow.document.querySelector('.direct-messages-received');
+				var dmLoaded = bar.contentWindow.dmLoaded;
+				//we need to check if the bar already has tweets in it. if it does, go ahead and add the new ones
+				//if it doesn't, go get the entire home_timeline and prepend that instead
+				if(dmLoaded) {
+					$(tweetBody).prependTo($(container));
+					//trim out old tweets to keep down memory overhead, et cetera
+					//should probably be a configurable parameter
+					while($(container).find('.tweet').length > maxTweetsDisplayed) { $(container).find('.tweet').last().remove(); }
+				} else {
+					populateDMBar(bar);
+				}
+			}
+		}
+		
+		function populateDMBar(bar) {
+			var container = bar.contentWindow.document.querySelector('.direct-messages-received');
+			var initialLoad = bar.contentWindow.document.querySelector('#initial-load');
+			$(initialLoad).hide();
+			var tweetBody = generateTweetBody(Avian.responses.direct_messages);
+			$(tweetBody).prependTo($(container));
+			bar.contentWindow.directMessagesLoaded = true;
+		}
+
+		function populateOrUpdateSentDMBars(data){
+			var tweetBody = generateTweetBody(data);
+			for (var k=0; k < safari.extension.bars.length; k++) {
+				bar = safari.extension.bars[k];
+				var container = bar.contentWindow.document.querySelector('.direct-messages-sent');
+				var dmLoaded = bar.contentWindow.dmLoaded;
+				//we need to check if the bar already has tweets in it. if it does, go ahead and add the new ones
+				//if it doesn't, go get the entire home_timeline and prepend that instead
+				if(dmLoaded) {
+					$(tweetBody).prependTo($(container));
+					//trim out old tweets to keep down memory overhead, et cetera
+					//should probably be a configurable parameter
+					while($(container).find('.tweet').length > maxTweetsDisplayed) { $(container).find('.tweet').last().remove(); }
+				} else {
+					populateSentDMBar(bar);
+				}
+			}
+		}
+		
+		function populateSentDMBar(bar) {
+			var container = bar.contentWindow.document.querySelector('.direct-messages-sent');
+			var initialLoad = bar.contentWindow.document.querySelector('#initial-load');
+			$(initialLoad).hide();
+			var tweetBody = generateTweetBody(Avian.responses.dm_sent);
+			$(tweetBody).prependTo($(container));
+			bar.contentWindow.directMessagesSentLoaded = true;
+		}
+
+		function generateTweetInfo(obj) {
+			var user;
+			var type;
+			var tweet;
+			var status_id;
+			if(typeof obj.user == 'object') {
+				if(typeof obj.retweeted_status == 'object') {
+					//this is a retweet. let's pull the original text
+					type = 'retweet';
+					user = obj.retweeted_status.user;
+					tweet = obj.retweeted_status.text;
+					status_id = obj.id; //this is the retweet id, do we want the original tweet id
+				} else {
+					user = obj.user;
+					type = 'tweet';
+					tweet = obj.text;
+					status_id = obj.id;
+				}
+			} else {
+				//DMs have sender/recipient, not user.
+				user = obj.sender;
+				type = 'dm';
+				tweet = obj.text;
+				status_id = obj.id;
+			}
+			return {user: user, type: type, tweet: tweet, status_id: status_id};
+		}
+		
+		function generateTweetBody(data,limit) {
+			if(typeof limit == 'undefined') {
+				limit = maxTweetsDisplayed;
+			}
+			if (data.length == 0) {
+				limit = 0;
+			}
+			if (data.length < limit) {
+				limit = data.length;
+			}
+			var tweetBody;
+			//we iterate only up to the limit we allow.
+			for (var i=0; i < limit; i++) {
+				var returned = generateTweetInfo(data[i]);
+				var user = returned.user;
+				var type = returned.type;
+				var tweet = returned.tweet;
+				var status_id = returned.status_id;
+				
+				var options;
+				if(type == 'tweet' || type == 'retweet') {
+					options = '<span title="Reply" class="reply"></span><span title="Retweet" class="retweet"></span>';
+				} else {
+					options = '<span title="Reply" class="dm-reply"></span>';
+				}
+				
+				var shameful_retweet_hack;
+				if(type == 'retweet') {
+					shameful_retweet_hack = '<a class="avatar-retweet" href="http://twitter.com/'+data[i].user.screen_name+'" title="'+data[i].user.screen_name+'"><img class="avatar-retweet" src="'+data[i].user.profile_image_url+'" /></a>';
+				} else {
+					shameful_retweet_hack = '';
+				}
+				
+				var unread;
+				if(type == 'tweet' || type == 'retweet') {
+					try {
+						unread = Avian.getTweetMetadata(status_id).unread;
+					} catch(e) {
+						console.log('no tweet metadata for status_id: '+status_id);
+						unread = true;
+					}
+				} else if (type == 'dm') {
+					try {
+						unread = Avian.getDMMetadata(status_id).unread;
+					} catch(e) {
+						console.log('no tweet metadata for status_id: '+status_id);
+						unread = true;
+					}
+				}
+				var unreadText = (unread)?'<span class="unread">&#x25cf;</span>':'';
+				var escaped_tweet = data[i].text.replace(/\"/g,'&quot;');
+				var matches = tweet.match(/\b((?:[a-z][\w-]+:(?:\/{1,3}|[a-z0-9%])|www\d{0,3}[.])(?:[^\s()<>]+|\([^\s()<>]+\))+(?:\([^\s()<>]+\)|[^`!()\[\]{};:'".,<>?«»“”‘’\s]))/gi);
+				if (matches){
+					for (var j=0; j < matches.length; j++) {
+						var actualUrl;
+						if(matches[j].match(/http/) == null) {
+							actualUrl = 'http://'+matches[j];
+						} else {
+							actualUrl = matches[j];
+						}
+						tweet = tweet.replace(matches[j],'<a href="'+actualUrl+'">'+matches[j]+'</a>');
+					}
+				}
+				var isFavoriteShow;
+				var notFavoriteShow;
+				if(data[i].favorited) {
+					isFavoriteShow = 'show';
+					notFavoriteShow = '';
+				} else {
+					isFavoriteShow = '';
+					notFavoriteShow = 'show';
+				}
+				var overlay= '<div class="overlay"><span class="favorite not-favorite '+notFavoriteShow+'">&#x2606;</span><span class="favorite is-favorite '+isFavoriteShow+'">&#x2605;</span></div>';
+				//replace with a new regex.
+				tweet = tweet.replace(/(^|[^a-z0-9_])@([a-z0-9_]+)/gi, '$1<a href="http://twitter.com/$2">@$2</a>');
+				tweet = tweet.replace(/#([a-z0-9]+)/gi, '<a href="http://twitter.com/#search?q=%23$1">#$1</a>');
+				
+				tweetBody += '<div class="tweet" type="'+type+'" status_id="'+status_id+'" screen_name="'+user.screen_name+'">'+overlay+unreadText+shameful_retweet_hack+'<a href="http://twitter.com/'+user.screen_name+'" title="'+user.screen_name+'"><img class="avatar" src="'+user.profile_image_url+'"/></a><div class="options">'+options+'</div><div class="content" title="'+escaped_tweet+'">'+ tweet + '</div></div>';
+			}
+			return tweetBody;
+		}
+
+		$(document).ready(function() {
+			if(Avian.checkAuthStatus()) {
+				setUpdateInterval();
+				updateData();
+			}
+		});
+	</script>
+</head>
+<body>
+	i am global
+</body>
+</html>

@@ -1,0 +1,82 @@
+body {
+	padding:0px 0px 0px 0px;
+	white-space:normal;
+}
+
+a {
+	text-decoration:none;
+	color:#333;
+	
+}
+
+#container {
+
+}
+
+
+.tweet {
+	border-bottom:1px solid rgba(0,0,0,0.3);
+}
+
+.tweet:hover {
+	background: -webkit-gradient(linear, left bottom, left top, color-stop(1, rgba(0,0,0, 0.1)), color-stop(0, rgba(255,255,255, 0.1)));
+	-webkit-box-shadow:inset 0 0 8px rgba(0,0,0,0.1);
+}
+
+
+.tweet .avatar {
+	width:48px;
+	height:48px;
+	vertical-align:top;
+	margin: 5px;
+	
+}
+
+.tweet .content {
+	display:inline-block;
+	font-family: "Lucida Grande";
+	font-size:13px;
+	line-height:13px;
+	height:26px;
+	margin:5px;
+	vertical-align:top;
+	word-wrap:break-word;
+}
+
+.tweet .content a:hover {
+	background-color: rgba(255,255,255,0.2);
+	color: rgb(0,0,100);
+}
+
+.tweet .options {
+	margin-top:15px;
+	display:inline-block;
+	width:14px;
+}
+.tweet .options img {
+	margin:4px 4px;
+	vertical-align:middle;
+}
+
+.reply,.dm-reply {
+	display:inline-block;
+	height:11px;
+	margin-bottom:3px;
+	width:11px;
+	background:url(icons/reply-retweet.png) no-repeat 0px 0px;
+}
+
+.reply:hover,.dm-reply:hover {
+	background:url(icons/reply-retweet.png) no-repeat -11px 0px;
+}
+
+.retweet {
+	display:inline-block;
+	height:8px;
+	width:14px;
+	background:url(icons/reply-retweet.png) no-repeat 0px -11px;
+}
+
+.retweet:hover {
+	background:url(icons/reply-retweet.png) no-repeat -14px -11px;
+}

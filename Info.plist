@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Author</key>
+	<string>Paul Kehrer</string>
+	<key>CFBundleDisplayName</key>
+	<string>AvianSafari</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.languish.aviansafari</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0</string>
+	<key>CFBundleVersion</key>
+	<string>1</string>
+	<key>Chrome</key>
+	<dict>
+		<key>Bars</key>
+		<array>
+			<dict>
+				<key>Filename</key>
+				<string>bar.html</string>
+				<key>Identifier</key>
+				<string>aviansafari</string>
+				<key>Label</key>
+				<string>AvianSafari</string>
+			</dict>
+		</array>
+		<key>Global Page</key>
+		<string>global.html</string>
+		<key>Toolbar Items</key>
+		<array>
+			<dict>
+				<key>Command</key>
+				<string>aviansafari-toggle</string>
+				<key>Identifier</key>
+				<string>com.languish.aviansafari</string>
+				<key>Image</key>
+				<string>icons/avian.png</string>
+				<key>Include By Default</key>
+				<true/>
+				<key>Label</key>
+				<string>AvianSafari</string>
+				<key>Palette Label</key>
+				<string>AvianSafari</string>
+				<key>Tool Tip</key>
+				<string>AvianSafari</string>
+			</dict>
+		</array>
+	</dict>
+	<key>Content</key>
+	<dict>
+		<key>Scripts</key>
+		<dict>
+			<key>Start</key>
+			<array>
+				<string>callback.js</string>
+			</array>
+		</dict>
+		<key>Whitelist</key>
+		<array>
+			<string>http://langui.sh/extensions/aviansafari-callback.html</string>
+		</array>
+	</dict>
+	<key>Description</key>
+	<string>Twitter fun.</string>
+	<key>ExtensionInfoDictionaryVersion</key>
+	<string>1.0</string>
+	<key>Permissions</key>
+	<dict>
+		<key>Website Access</key>
+		<dict>
+			<key>Allowed Domains</key>
+			<array>
+				<string>twitter.com</string>
+				<string>api.twitter.com</string>
+				<string>langui.sh</string>
+				<string>search.twitter.com</string>
+				<string>tinyvh.com</string>
+				<string>tinyurl.com</string>
+				<string>api.bit.ly</string>
+				<string>api.j.mp</string>
+			</array>
+			<key>Include Secure Pages</key>
+			<true/>
+			<key>Level</key>
+			<string>Some</string>
+		</dict>
+	</dict>
+	<key>Website</key>
+	<string>http://langui.sh</string>
+</dict>
+</plist>

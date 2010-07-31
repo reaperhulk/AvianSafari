@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<array>
+	<dict>
+		<key>DefaultValue</key>
+		<real>5</real>
+		<key>Key</key>
+		<string>updateInterval</string>
+		<key>MaximumValue</key>
+		<real>10</real>
+		<key>MinimumValue</key>
+		<real>1</real>
+		<key>Secure</key>
+		<false/>
+		<key>StepValue</key>
+		<real>0.5</real>
+		<key>Title</key>
+		<string>Update Interval</string>
+		<key>Titles</key>
+		<array>
+			<string>1 Minute</string>
+			<string>5 Minutes</string>
+			<string>10 Minutes</string>
+		</array>
+		<key>Type</key>
+		<string>PopUpButton</string>
+		<key>Values</key>
+		<array>
+			<real>1</real>
+			<real>5</real>
+			<real>10</real>
+		</array>
+	</dict>
+	<dict>
+		<key>DefaultValue</key>
+		<string>bitly</string>
+		<key>Key</key>
+		<string>shortener</string>
+		<key>Title</key>
+		<string>Link Shortener</string>
+		<key>Titles</key>
+		<array>
+			<string>TinyVH</string>
+			<string>TinyURL</string>
+			<string>bit.ly</string>
+			<string>j.mp</string>
+		</array>
+		<key>Type</key>
+		<string>PopUpButton</string>
+		<key>Values</key>
+		<array>
+			<string>tinyvh</string>
+			<string>tinyurl</string>
+			<string>bitly</string>
+			<string>jmp</string>
+		</array>
+	</dict>
+	<dict>
+		<key>Title</key>
+		<string>bit.ly/j.mp Credentials (Optional)</string>
+		<key>Type</key>
+		<string>Group</string>
+	</dict>
+	<dict>
+		<key>Key</key>
+		<string>x_login</string>
+		<key>Title</key>
+		<string>Login</string>
+		<key>Type</key>
+		<string>TextField</string>
+	</dict>
+	<dict>
+		<key>Key</key>
+		<string>x_apiKey</string>
+		<key>Title</key>
+		<string>API Key</string>
+		<key>Type</key>
+		<string>TextField</string>
+	</dict>
+	<dict>
+		<key>Title</key>
+		<string>Link Behavior</string>
+		<key>Type</key>
+		<string>Group</string>
+	</dict>
+	<dict>
+		<key>DefaultValue</key>
+		<string>newTab</string>
+		<key>Key</key>
+		<string>linkBehavior</string>
+		<key>Title</key>
+		<string>Links Open In</string>
+		<key>Titles</key>
+		<array>
+			<string>New Tab</string>
+			<string>Current Tab</string>
+			<string>New Window</string>
+		</array>
+		<key>Type</key>
+		<string>PopUpButton</string>
+		<key>Values</key>
+		<array>
+			<string>newTab</string>
+			<string>currentTab</string>
+			<string>newWindow</string>
+		</array>
+	</dict>
+	<dict>
+		<key>DefaultValue</key>
+		<string>foreground</string>
+		<key>Key</key>
+		<string>tabFocus</string>
+		<key>Title</key>
+		<string>Tab Focus</string>
+		<key>Titles</key>
+		<array>
+			<string>Background</string>
+			<string>Foreground</string>
+		</array>
+		<key>Type</key>
+		<string>PopUpButton</string>
+		<key>Values</key>
+		<array>
+			<string>background</string>
+			<string>foreground</string>
+		</array>
+	</dict>
+	<dict>
+		<key>DefaultValue</key>
+		<string>right</string>
+		<key>Key</key>
+		<string>tabPosition</string>
+		<key>Title</key>
+		<string>Tab Position</string>
+		<key>Titles</key>
+		<array>
+			<string>Right of Active Tab</string>
+			<string>Left of Active Tab</string>
+			<string>Beginning</string>
+			<string>End</string>
+		</array>
+		<key>Type</key>
+		<string>PopUpButton</string>
+		<key>Values</key>
+		<array>
+			<string>right</string>
+			<string>left</string>
+			<string>beginning</string>
+			<string>end</string>
+		</array>
+	</dict>
+</array>
+</plist>
