@@ -38,7 +38,7 @@ function Avian(params) {
 	this.unreadMentions = (params.unreadMentions)?params.unreadMentions:0;
 	this.unreadDMs = (params.unreadDMs)?params.unreadDMs:0;
 	this.maxTweetsStored = 10000; //configurable. how many do you want to keep around?
-	this.defaultNumTweetsRequested = 50; //default number to obtain for methods like getHomeTimeline
+	this.defaultNumTweetsRequested = 100; //default number to obtain for methods like getHomeTimeline
 
 	//for PATHS we track with a boolean whether auth is required, but we don't do anything with it
 	this.PATHS = {
@@ -192,7 +192,7 @@ Avian.prototype = {
 		var errorCallback = function(xhr, textStatus, errorThrown) {
 			//should probably handle the common twitter errors here
 			//http://apiwiki.twitter.com/HTTP-Response-Codes-and-Errors
-			me.logging('getHomeTimeline error callback response: '+errorThrown);
+			me.logging('queryTwitter error callback response: '+errorThrown);
 			if(typeof userErrorCallback == 'function') { userErrorCallback(errorThrown); }
 		};
 		var info = this.getPath(apiMethod);
@@ -228,12 +228,17 @@ Avian.prototype = {
 		}
 	},
 	
-	addDirectMessageMetadata: function(obj) {
+	addDirectMessageMetadata: function(obj,sentReceived) {
 		this.logging('adding DM metadata');
 		for(var i=0;i < obj.length;i++) {
 			var dm = obj[i];
 			if(typeof this.metadata.direct_messages[dm.id] == 'undefined') {
-				this.metadata.direct_messages[dm.id] = {unread:true};
+				if(sentReceived == 'received') {
+					this.metadata.direct_messages[dm.id] = {unread:true};
+				} else {
+					//the user sent this so we don't want it to be unread...
+					this.metadata.direct_messages[dm.id] = {unread:false};
+				}
 			}
 		}
 	},
@@ -302,18 +307,6 @@ Avian.prototype = {
 			if (numToRemove > 0) {
 				var index = me.responses['mentions'].length-numToRemove-1; //0 indexed so we need to subtract 1 more
 				var removedTweets = me.responses['mentions'].splice(index,numToRemove);
-			
-				/*
-				we have a problem here. if we reach the maxTweetsStored limit and we remove a 
-				tweet from mentions that is still present in home_timeline (or vice versa), then 
-				we are removing the metadata while it's still needed.  need to come up with a solution 
-				for this issue before release. TODO
-				one solution...don't truncate the metadata object
-				
-				for(var j=0;j< removedTweets.length;j++) {
-					var id = removedTweets[j].id;
-					delete me.metadata.tweets[id]; //delete our metadata object for this tweet
-				}*/
 			}
 			
 			if(typeof userSuccessCallback == 'function') { userSuccessCallback(parsedObj); }
@@ -335,7 +328,7 @@ Avian.prototype = {
 				}
 			}
 		}
-		if(typeof this.responses.mentions != 'undefined') {
+		if(typeof this.responses.mentions != 'undefined' && found != true) {
 			for(var j=0;j < this.responses.mentions.length;j++) {
 				if(this.responses.mentions[j].id == status_id) {
 					//okay we've already got the tweet. set the response object
@@ -366,7 +359,7 @@ Avian.prototype = {
 		}
 		function errorCallback(errorThrown) {
 			me.logging('getThread failed on xhr');
-			if(typeof userErrorCallback == 'function') { userErrorCallback(errorThrown); }
+			if(typeof userErrorCallback == 'function') { userErrorCallback(errorThrown,me.responses.thread); }
 		}
 		this.getTweet(status_id,successCallback,errorCallback);
 	},
@@ -386,7 +379,7 @@ Avian.prototype = {
 		} else {
 			apiMethod = 'dm_sent';
 		}
-		//by default, get only the most recent mentions
+		//by default, get only the most recent
 		if(typeof this.responses[apiMethod] != 'undefined' && typeof params.since_id == 'undefined') {
 			params.since_id = this.responses[apiMethod][0].id;
 		}
@@ -395,7 +388,7 @@ Avian.prototype = {
 		}
 		var me = this;
 		function directMessagesSuccessCallback(parsedObj) {
-			me.addDirectMessageMetadata(parsedObj);
+			me.addDirectMessageMetadata(parsedObj,sentReceived);
 			
 			//iterate over the metadata to see if all these new DMs have been read previously
 			var newUnreadDMs = 0;
@@ -411,18 +404,6 @@ Avian.prototype = {
 			if (numToRemove > 0) {
 				var index = me.responses[apiMethod].length-numToRemove-1; //0 indexed so we need to subtract 1 more
 				var removedDirectMessages = me.responses[apiMethod].splice(index,numToRemove);
-			
-				/*
-				we have a problem here. if we reach the maxTweetsStored limit and we remove a 
-				tweet from mentions that is still present in home_timeline (or vice versa), then 
-				we are removing the metadata while it's still needed.  need to come up with a solution 
-				for this issue before release. TODO
-				one solution...don't truncate the metadata object
-				
-				for(var j=0;j< removedTweets.length;j++) {
-					var id = removedTweets[j].id;
-					delete me.metadata.tweets[id]; //delete our metadata object for this tweet
-				}*/
 			}
 			
 			if(typeof userSuccessCallback == 'function') { userSuccessCallback(parsedObj); }
@@ -439,7 +420,6 @@ Avian.prototype = {
 	},
 
 	sendDirectMessage: function(status,user_id,userSuccessCallback,userErrorCallback) {
-		//add it to the sent DMs object + metadata?
 		this.queryTwitter('dm_new',{text:status,user:user_id},userSuccessCallback,userErrorCallback);
 	},
 
@@ -556,18 +536,6 @@ Avian.prototype = {
 			if (numToRemove > 0) {
 				var index = me.responses['favorites'].length-numToRemove-1; //0 indexed so we need to subtract 1 more
 				var removedTweets = me.responses['favorites'].splice(index,numToRemove);
-			
-				/*
-				we have a problem here. if we reach the maxTweetsStored limit and we remove a 
-				tweet from mentions that is still present in home_timeline (or vice versa), then 
-				we are removing the metadata while it's still needed.  need to come up with a solution 
-				for this issue before release. TODO
-				one solution...don't truncate the metadata object
-				
-				for(var j=0;j< removedTweets.length;j++) {
-					var id = removedTweets[j].id;
-					delete me.metadata.tweets[id]; //delete our metadata object for this tweet
-				}*/
 			}
 			
 			if(typeof userSuccessCallback == 'function') { userSuccessCallback(parsedObj); }

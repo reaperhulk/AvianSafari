@@ -6,6 +6,7 @@
 	<script type="text/javascript">
 		var handleMessage = function(event) {
 			if (event.name == 'aviansafari') {
+				$('#loading').hide();
 				generateThreadBody(event.message);
 			}
 		};
@@ -45,7 +46,7 @@
 				//replace with a new regex.
 				tweet = tweet.replace(/(^|[^a-z0-9_])@([a-z0-9_]+)/gi, '$1<a href="http://twitter.com/$2">@$2</a>');
 				tweet = tweet.replace(/#([a-z0-9]+)/gi, '<a href="http://twitter.com/#search?q=%23$1">#$1</a>');
-				tweetBody += '<div class="tweet" status_id="'+status_id+'" screen_name="'+user.screen_name+'"><a href="http://twitter.com/'+user.screen_name+'" title="'+user.screen_name+'"><img class="avatar" src="'+user.profile_image_url+'"/></a><div class="options"><span title="Reply" class="reply"></span><span title="Retweet" class="retweet"></span></div><div class="content">'+ tweet + '</div><div class="metadata"><a href="http://twitter.com/'+user.screen_name+'/status/'+status_id+'">'+created_at+'</a> from '+source+'</div></div>';
+				tweetBody += '<div class="tweet" status_id="'+status_id+'" screen_name="'+user.screen_name+'"><a href="http://twitter.com/'+user.screen_name+'" title="'+user.screen_name+'"><img class="avatar" src="'+user.profile_image_url+'"/></a><div class="options"><span title="Reply" class="reply"></span><span title="Retweet" class="retweet"></span></div><div class="content">'+ tweet + '</div><div class="metadata"><a href="http://twitter.com/'+user.screen_name+'/status/'+status_id+'">'+Date(created_at)+'</a> from '+source+'</div></div>';
 			}
 			$(tweetBody).prependTo($('#container'));
 		}
@@ -64,6 +65,6 @@
 </head>
 <body>
 	<h2>View Thread</h2>
-	<div id="container"></div>
+	<div id="container"><img id="loading" style="display:block;margin:0 auto" src="icons/loading.gif" /></div>
 </body>
 </html>

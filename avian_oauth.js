@@ -1,6 +1,6 @@
 /*
 AvianLib: Javascript OAuth for Twitter
-Primarily designed for Twitter, this is an OAuth lib written entirely in Javascript (for use in JS environments not bound by cross-domain restrictions.  Appcelerator, WebOS, Safari extensions, Chrome extensions, et cetera)
+Primarily designed for Twitter, this is an OAuth lib written entirely in Javascript (for use in JS environments not bound by cross-domain restrictions.  Appcelerator, WebOS, Safari extensions, Chrome extensions, et cetera). Avian itself is specific to Twitter, but the OAuth object (found in avianlib_oauth.js) should be easily used for different OAuth applications.
 
     Copyright 2010 Paul Kehrer
 
