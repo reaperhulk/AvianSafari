@@ -239,6 +239,7 @@ function prevPage() {
 }
 
 function firstPage() {
+	var selector = getPageSelector();
 	var tweets = $(selector+' .tweet:hidden');
 	tweets.css('left',0).show();
 }
@@ -521,6 +522,12 @@ $(document).ready(function() {
 		return false;
 	});
 
+	$('#get-current-link').click(function() {
+		var tweetText = $('.create-tweet .tweet-text').val();
+		$('.create-tweet .tweet-text').val(tweetText+safari.application.activeBrowserWindow.activeTab.url);
+		return false;
+	});
+
 	$('.create-tweet .tweet-text').keyup(function(event) {
 		checkTweetLength();
 	});
@@ -730,6 +737,9 @@ $(document).ready(function() {
 				<button id="send-tweet" style="width:40px;padding:0" title="Send Tweet (&#x2318;&#x21a9;)">Send</button>
 				<br/>
 				<button id="shorten" style="width:50px;padding:0" title="Shorten Links (&#x21e7;&#x2318;L)">Shorten</button>
+			</div>
+			<div style="display:inline-block;vertical-align:top">
+				<button id="get-current-link" style="width:20;padding:0" title="Insert Current Tab URL Into Tweet">&#x21B2;</button>
 			</div>
 			<div style="float:right" class="replying-to-tweet"></div>
 		</div>
