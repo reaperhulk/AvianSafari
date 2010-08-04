@@ -582,17 +582,32 @@ $(document).ready(function() {
 
 	$('.tweet .reply').live('click', function(event) {
 		var in_reply_to_status_id = $(this).parent().parent().attr('status_id');
+		/*
+		when clicking a link in the tweet div (be it @mention, #hashtag, url, or avatar), it's 
+		hopefully a safe assumption that the tweet should be marked as read.
+		*/
+		g.markTweetAsRead(in_reply_to_status_id); //this is the status_id of the current tweet div, as seen above
 		replySetup(in_reply_to_status_id);
 	});
 
 	$('.tweet .retweet').live('click', function(event) {
 		var status_id = $(this).parent().parent().attr('status_id');
+		/*
+		when clicking a link in the tweet div (be it @mention, #hashtag, url, or avatar), it's 
+		hopefully a safe assumption that the tweet should be marked as read.
+		*/
+		g.markTweetAsRead(status_id);
 		retweet(status_id);
 	});
 
 	//TODO: incorporate this into the replySetup(). will need new methods in avianlib (getDM like getTweet)
 	$('.tweet .dm-reply').live('click', function(event) {
 		var status_id = $(this).parent().parent().attr('status_id');
+		/*
+		when clicking a link in the tweet div (be it @mention, #hashtag, url, or avatar), it's 
+		hopefully a safe assumption that the tweet should be marked as read.
+		*/
+		g.markTweetAsRead(status_id);
 		dmReplySetup(status_id);
 	});
 
@@ -619,6 +634,11 @@ $(document).ready(function() {
 	
 	$('.tweet a').live('click',function() {
 		followLink($(this).attr("href"));
+		/*
+		when clicking a link in the tweet div (be it @mention, #hashtag, url, or avatar), it's 
+		hopefully a safe assumption that the tweet should be marked as read.
+		*/
+		g.markTweetAsRead($(this).parents('.tweet').attr('status_id'));
 		return false;
 	});
 
