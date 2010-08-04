@@ -172,27 +172,27 @@ Avian.prototype = {
 	queryTwitter : function(apiMethod,params,userSuccessCallback,userErrorCallback) {
 		this.logging('queryTwitter params:');
 		this.logging(params);
-		var me = this;
+		var self = this;
 		var successCallback = function(data, textStatus, xhr) {
-			//me.logging('success callback response: '+data);
+			//self.logging('success callback response: '+data);
 			var parsedObj;
 			try {
 				parsedObj = JSON.parse(data);
 			} catch(e) {
 				parsedObj = eval(data); //boo eval.
 			}
-			me.logging(parsedObj);
-			if(typeof me.responses[apiMethod] == 'object' && me.responses[apiMethod] instanceof Array === true) {
-				me.responses[apiMethod] = parsedObj.concat(me.responses[apiMethod]);
+			self.logging(parsedObj);
+			if(typeof self.responses[apiMethod] == 'object' && self.responses[apiMethod] instanceof Array === true) {
+				self.responses[apiMethod] = parsedObj.concat(self.responses[apiMethod]);
 			} else {
-				me.responses[apiMethod] = parsedObj;
+				self.responses[apiMethod] = parsedObj;
 			}
 			if(typeof userSuccessCallback == 'function') { userSuccessCallback(parsedObj); }
 		};
 		var errorCallback = function(xhr, textStatus, errorThrown) {
 			//should probably handle the common twitter errors here
 			//http://apiwiki.twitter.com/HTTP-Response-Codes-and-Errors
-			me.logging('queryTwitter error callback response: '+errorThrown);
+			self.logging('queryTwitter error callback response: '+errorThrown);
 			if(typeof userErrorCallback == 'function') { userErrorCallback(errorThrown); }
 		};
 		var info = this.getPath(apiMethod);
@@ -252,27 +252,30 @@ Avian.prototype = {
 		if(typeof params.count == 'undefined') {
 			params.count = this.defaultNumTweetsRequested;
 		}
-		var me = this;
+		if(typeof params.include_entities == 'undefined') {
+			params.include_entities = 1;
+		}
+		var self = this;
 		function homeTimelineSuccessCallback(parsedObj) {
 			//loop through the tweets, adding metadata for each one
-			me.addTweetMetadata(parsedObj);
+			self.addTweetMetadata(parsedObj);
 			//iterate over the metadata to see if all these new tweets have been read previously (perhaps as a mention)
 			var newUnreadTweets = 0;
 			for(var i=0;i < parsedObj.length;i++) {
-				if(me.metadata.tweets[parsedObj[i].id].unread == true) {
+				if(self.metadata.tweets[parsedObj[i].id].unread == true) {
 					newUnreadTweets++;
 				}
 			}
-			me.unreadTweets += newUnreadTweets;
+			self.unreadTweets += newUnreadTweets;
 
-			var numToRemove = me.responses['home_timeline'].length - me.maxTweetsStored;
+			var numToRemove = self.responses['home_timeline'].length - self.maxTweetsStored;
 			if (numToRemove > 0) {
-				var index = me.responses['home_timeline'].length-numToRemove-1; //0 indexed so we need to subtract 1 more
-				var removedTweets = me.responses['home_timeline'].splice(index,numToRemove);
+				var index = self.responses['home_timeline'].length-numToRemove-1; //0 indexed so we need to subtract 1 more
+				var removedTweets = self.responses['home_timeline'].splice(index,numToRemove);
 			
 				/*for(var j=0;j< removedTweets.length;j++) {
 					var id = removedTweets[j].id;
-					delete me.metadata.tweets[id]; //delete our metadata object for this tweet
+					delete self.metadata.tweets[id]; //delete our metadata object for this tweet
 				}*/
 			}
 			
@@ -289,24 +292,27 @@ Avian.prototype = {
 		if(typeof params.count == 'undefined') {
 			params.count = this.defaultNumTweetsRequested;
 		}
-		var me = this;
+		if(typeof params.include_entities == 'undefined') {
+			params.include_entities = 1;
+		}
+		var self = this;
 		function mentionsSuccessCallback(parsedObj) {
-			me.addTweetMetadata(parsedObj);
+			self.addTweetMetadata(parsedObj);
 			//iterate over the metadata to see if all these new tweets have been read previously (perhaps in home timeline)
 			var newUnreadMentions = 0;
 			for(var i=0;i < parsedObj.length;i++) {
-				if(me.metadata.tweets[parsedObj[i].id].unread == true) {
+				if(self.metadata.tweets[parsedObj[i].id].unread == true) {
 					newUnreadMentions++;
 				}
 			}
-			me.unreadMentions += newUnreadMentions;
+			self.unreadMentions += newUnreadMentions;
 			
 			//see if the response array exceeds our allowed limit.
 			//if so, truncate and strip the metadata out
-			var numToRemove = me.responses['mentions'].length - me.maxTweetsStored;
+			var numToRemove = self.responses['mentions'].length - self.maxTweetsStored;
 			if (numToRemove > 0) {
-				var index = me.responses['mentions'].length-numToRemove-1; //0 indexed so we need to subtract 1 more
-				var removedTweets = me.responses['mentions'].splice(index,numToRemove);
+				var index = self.responses['mentions'].length-numToRemove-1; //0 indexed so we need to subtract 1 more
+				var removedTweets = self.responses['mentions'].splice(index,numToRemove);
 			}
 			
 			if(typeof userSuccessCallback == 'function') { userSuccessCallback(parsedObj); }
@@ -347,19 +353,19 @@ Avian.prototype = {
 	
 	getThread: function(status_id,userSuccessCallback,userErrorCallback) {
 		this.responses.thread = [];
-		var me = this;
+		var self = this;
 		function successCallback(data) {
 			if(data.in_reply_to_status_id == null) {
-				me.responses.thread.push(data);
-				if(typeof userSuccessCallback == 'function') { userSuccessCallback(me.responses.thread); }
+				self.responses.thread.push(data);
+				if(typeof userSuccessCallback == 'function') { userSuccessCallback(self.responses.thread); }
 			} else {
-				me.responses.thread.push(data);
-				me.getTweet(data.in_reply_to_status_id,successCallback,errorCallback);
+				self.responses.thread.push(data);
+				self.getTweet(data.in_reply_to_status_id,successCallback,errorCallback);
 			}
 		}
 		function errorCallback(errorThrown) {
-			me.logging('getThread failed on xhr');
-			if(typeof userErrorCallback == 'function') { userErrorCallback(errorThrown,me.responses.thread); }
+			self.logging('getThread failed on xhr');
+			if(typeof userErrorCallback == 'function') { userErrorCallback(errorThrown,self.responses.thread); }
 		}
 		this.getTweet(status_id,successCallback,errorCallback);
 	},
@@ -386,24 +392,24 @@ Avian.prototype = {
 		if(typeof params.count == 'undefined') {
 			params.count = this.defaultNumTweetsRequested;
 		}
-		var me = this;
+		var self = this;
 		function directMessagesSuccessCallback(parsedObj) {
-			me.addDirectMessageMetadata(parsedObj,sentReceived);
+			self.addDirectMessageMetadata(parsedObj,sentReceived);
 			
 			//iterate over the metadata to see if all these new DMs have been read previously
 			var newUnreadDMs = 0;
 			for(var i=0;i < parsedObj.length;i++) {
-				if(me.metadata.direct_messages[parsedObj[i].id].unread == true) {
+				if(self.metadata.direct_messages[parsedObj[i].id].unread == true) {
 					newUnreadDMs++;
 				}
 			}
-			me.unreadDMs += newUnreadDMs;
+			self.unreadDMs += newUnreadDMs;
 			
 			//see if the response array exceeds our allowed limit.
-			var numToRemove = me.responses[apiMethod].length - me.maxTweetsStored;
+			var numToRemove = self.responses[apiMethod].length - self.maxTweetsStored;
 			if (numToRemove > 0) {
-				var index = me.responses[apiMethod].length-numToRemove-1; //0 indexed so we need to subtract 1 more
-				var removedDirectMessages = me.responses[apiMethod].splice(index,numToRemove);
+				var index = self.responses[apiMethod].length-numToRemove-1; //0 indexed so we need to subtract 1 more
+				var removedDirectMessages = self.responses[apiMethod].splice(index,numToRemove);
 			}
 			
 			if(typeof userSuccessCallback == 'function') { userSuccessCallback(parsedObj); }
@@ -479,17 +485,17 @@ Avian.prototype = {
 	},
 
 	createFavorite: function(status_id,userSuccessCallback,userErrorCallback) {
-		var me = this;
+		var self = this;
 		function createFavoriteSuccessCallback(parsedObj) {
-			/*for(var i=0;i < me.responses.home_timeline.length;i++) {
-				if(me.responses.home_timeline[i].id == status_id) {
-					me.responses.home_timeline[i].favorited = true;
+			/*for(var i=0;i < self.responses.home_timeline.length;i++) {
+				if(self.responses.home_timeline[i].id == status_id) {
+					self.responses.home_timeline[i].favorited = true;
 					break;
 				}
 			}
-			for(var j=0;j < me.responses.mentions.length;i++) {
-				if(me.responses.mentions[i].id == status_id) {
-					me.responses.mentions[i].favorited = true;
+			for(var j=0;j < self.responses.mentions.length;i++) {
+				if(self.responses.mentions[i].id == status_id) {
+					self.responses.mentions[i].favorited = true;
 					break;
 				}
 			}*/
@@ -499,17 +505,17 @@ Avian.prototype = {
 	},
 
 	destroyFavorite: function(status_id,userSuccessCallback,userErrorCallback) {
-		var me = this;
+		var self = this;
 		function destroyFavoriteSuccessCallback(parsedObj) {
-			/*for(var i=0;i < me.responses.home_timeline.length;i++) {
-				if(me.responses.home_timeline[i].id == status_id) {
-					me.responses.home_timeline[i].favorited = false;
+			/*for(var i=0;i < self.responses.home_timeline.length;i++) {
+				if(self.responses.home_timeline[i].id == status_id) {
+					self.responses.home_timeline[i].favorited = false;
 					break;
 				}
 			}
-			for(var j=0;j < me.responses.mentions.length;i++) {
-				if(me.responses.mentions[j].id == status_id) {
-					me.responses.mentions[j].favorited = false;
+			for(var j=0;j < self.responses.mentions.length;i++) {
+				if(self.responses.mentions[j].id == status_id) {
+					self.responses.mentions[j].favorited = false;
 					break;
 				}
 			}*/
@@ -527,15 +533,15 @@ Avian.prototype = {
 		if(typeof params.count == 'undefined') {
 			params.count = this.defaultNumTweetsRequested;
 		}
-		var me = this;
+		var self = this;
 		function favoritesSuccessCallback(parsedObj) {
-			me.addTweetMetadata(parsedObj);
+			self.addTweetMetadata(parsedObj);
 			//see if the response array exceeds our allowed limit.
 			//if so, truncate and strip the metadata out
-			var numToRemove = me.responses['favorites'].length - me.maxTweetsStored;
+			var numToRemove = self.responses['favorites'].length - self.maxTweetsStored;
 			if (numToRemove > 0) {
-				var index = me.responses['favorites'].length-numToRemove-1; //0 indexed so we need to subtract 1 more
-				var removedTweets = me.responses['favorites'].splice(index,numToRemove);
+				var index = self.responses['favorites'].length-numToRemove-1; //0 indexed so we need to subtract 1 more
+				var removedTweets = self.responses['favorites'].splice(index,numToRemove);
 			}
 			
 			if(typeof userSuccessCallback == 'function') { userSuccessCallback(parsedObj); }

@@ -238,6 +238,11 @@ function prevPage() {
 	}
 }
 
+function firstPage() {
+	var tweets = $(selector+' .tweet:hidden');
+	tweets.css('left',0).show();
+}
+
 function sendTweet(update) {
 	if(update === null) {
 		return;
@@ -252,6 +257,7 @@ function sendTweet(update) {
 		alert('Tweet length exceeds 140 characters.');
 		return;
 	}
+	$('#tweet-loading').fadeIn();
 
 	var in_reply_to_status_id = $('.create-tweet .in_reply_to_status_id').val();
 
@@ -288,9 +294,9 @@ function sendTweet(update) {
 		});
 	} else {
 		if(in_reply_to_status_id != '') {
-			g.Avian.replyToTweet({status:update,in_reply_to_status_id:in_reply_to_status_id},updateSuccess);
+			g.Avian.replyToTweet({status:update,in_reply_to_status_id:in_reply_to_status_id},updateSuccess,updateError);
 		} else {
-			g.Avian.queryTwitter('update',{status:update},updateSuccess);
+			g.Avian.queryTwitter('update',{status:update},updateSuccess,updateError);
 		}
 	}
 	function updateSuccess(data) {
@@ -302,6 +308,11 @@ function sendTweet(update) {
 		$('.create-tweet .in_reply_to_status_id').val('');
 		$('.create-tweet .tweet-text').val('');
 		checkTweetLength();
+		$('#tweet-loading').fadeOut();
+	}
+	function updateError(data) {
+		//handle the error
+		$('#tweet-loading').fadeOut();
 	}
 }
 
@@ -420,11 +431,11 @@ function currentTabIndex() {
 
 $(document).ready(function() {
 	$('#auth-status').click(function() {
-		var me = this;
-		$(me).html('Authorization in progress...');
+		var self = this;
+		$(this).html('Authorization in progress...');
 		function success(data) {
 			if(data.oauth_token !== undefined) {
-				$(me).html('Log in/approve access to your Twitter account...');
+				$(self).html('Log in/approve access to your Twitter account...');
 				var tab = safari.application.activeBrowserWindow.openTab();
 				tab.url = 'https://api.twitter.com/oauth/authorize?oauth_token='+data.oauth_token;
 			}
@@ -444,6 +455,10 @@ $(document).ready(function() {
 	});
 
 	$('#home-timeline').click(function() {
+		if($(this).hasClass('toggled')) {
+			firstPage();
+			return false;
+		}
 		$('#controls button').removeClass('toggled');
 		$(this).addClass('toggled');
 		document.querySelector('#box-container').className = 'show-front';
@@ -451,6 +466,10 @@ $(document).ready(function() {
 	});
 
 	$('#mentions').click(function() {
+		if($(this).hasClass('toggled')) {
+			firstPage();
+			return false;
+		}
 		$('#controls button').removeClass('toggled');
 		$(this).addClass('toggled');
 		var boxContainer = document.querySelector('#box-container');
@@ -459,6 +478,10 @@ $(document).ready(function() {
 	});
 
 	$('#direct-messages').click(function() {
+		if($(this).hasClass('toggled')) {
+			firstPage();
+			return false;
+		}
 		$('#controls button').removeClass('toggled');
 		$(this).addClass('toggled');
 		var boxContainer = document.querySelector('#box-container');
@@ -527,12 +550,12 @@ $(document).ready(function() {
 		$(this).addClass('toggled');
 	});
 
-	$('[type=tweet] .content,[type=retweet] .content').live('click', function(event) {
+	$('div[type=tweet] .content,div[type=retweet] .content').live('click', function(event) {
 		var tweet = $(this).parent();
 		g.markTweetAsRead(tweet.attr('status_id'));
 	});
 
-	$('[type=dm] .content').live('click', function(event) {
+	$('div[type=dm] .content').live('click', function(event) {
 		var tweet = $(this).parent();
 		g.markDMAsRead(tweet.attr('status_id'));
 	});
@@ -611,20 +634,20 @@ $(document).ready(function() {
 	$('.tweet .overlay .is-favorite').live('click', function() {
 		var status_id = $(this).parent().parent().attr('status_id');
 		g.Avian.destroyFavorite(status_id, success);
-		var me = this;
+		var self = this;
 		function success(data) {
-			$(me).hide();
-			$(me).parent().find('.not-favorite').show();
+			$(self).hide();
+			$(self).parent().find('.not-favorite').show();
 		}
 	});
 
 	$('.tweet .overlay .not-favorite').live('click', function() {
 		var status_id = $(this).parent().parent().attr('status_id');
 		g.Avian.createFavorite(status_id, success);
-		var me = this;
+		var self = this;
 		function success(data) {
-			$(me).hide();
-			$(me).parent().find('.is-favorite').show();
+			$(self).hide();
+			$(self).parent().find('.is-favorite').show();
 		}
 	});
 });
@@ -678,6 +701,7 @@ $(document).ready(function() {
 		</div>
 		<div class="face top create-tweet">
 			<div class="chars-left">140</div>
+			<img id="tweet-loading" src="icons/tweet-loading.gif" />
 			<form style="display:inline-block">
 				<input type="hidden" class="in_reply_to_status_id" name="in_reply_to_status_id" />
 				<textarea class="tweet-text"></textarea>

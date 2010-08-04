@@ -218,8 +218,15 @@ img.avatar-retweet {
 .chars-left {
 	position:absolute;
 	left:423px;
-	top:13px;
+	top:15px;
 	color:#404040;
 	text-align:right;
 	width:24px;
+}
+
+#tweet-loading {
+	position:absolute;
+	left:432px;
+	top:2px;
+	display:none;
 }
