@@ -136,16 +136,64 @@
 			Avian.getDirectMessages('sent',{},success);
 		}
 
+		function destroyTweet(status_id) {
+			Avian.destroyTweet(status_id,destroyTweetSuccess,destroyTweetError);
+			function destroyTweetSuccess(parsedObj) {
+				for (var i=0; i < safari.extension.bars.length; i++) {
+					bar = safari.extension.bars[i];
+					//timeline
+					var timeline = bar.contentWindow.document.querySelector('.face.timeline');
+					$(timeline).find('div[status_id="'+status_id+'"]').fadeOut(400,fadeSuccess);
+					function fadeSuccess() {
+						$(this).remove();
+					}
+				}
+			}
+			function destroyTweetError(error) {
+				//we failed, for now just hide the activity overlay
+				for (var i=0; i < safari.extension.bars.length; i++) {
+					bar = safari.extension.bars[i];
+					//timeline
+					var timeline = bar.contentWindow.document.querySelector('.face.timeline');
+					$(timeline).find('div[status_id="'+status_id+'"]').find('.activity').hide();
+				}
+			}
+		}
+
+		function destroyDM(status_id) {
+			Avian.destroyDirectMessage(status_id,destroyDMSuccess,destroyDMError);
+			function destroyDMSuccess(parsedObj) {
+				for (var i=0; i < safari.extension.bars.length; i++) {
+					bar = safari.extension.bars[i];
+					//timeline
+					var direct_messages = bar.contentWindow.document.querySelector('.face.direct-messages');
+					$(direct_messages).find('div[status_id="'+status_id+'"]').fadeOut(400,fadeSuccess);
+					function fadeSuccess() {
+						$(this).remove();
+					}
+				}
+			}
+			function destroyDMError(error) {
+				//we failed, for now just hide the activity overlay
+				for (var i=0; i < safari.extension.bars.length; i++) {
+					bar = safari.extension.bars[i];
+					//timeline
+					var direct_messages = bar.contentWindow.document.querySelector('.face.direct-messages');
+					$(direct_messages).find('div[status_id="'+status_id+'"]').find('.activity').hide();
+				}
+			}
+		}
+
 		function markTweetAsRead(status_id) {
 			Avian.markTweetAsRead(status_id);
 			for (var i=0; i < safari.extension.bars.length; i++) {
 				bar = safari.extension.bars[i];
 				//timeline
 				var timeline = bar.contentWindow.document.querySelector('.face.timeline');
-				$(timeline).find('[status_id="'+status_id+'"]').find('.unread').remove();
+				$(timeline).find('div[status_id="'+status_id+'"]').find('.unread').remove();
 				//mentions
 				var mentions = bar.contentWindow.document.querySelector('.face.mentions');
-				$(mentions).find('[status_id="'+status_id+'"]').find('.unread').remove();
+				$(mentions).find('div[status_id="'+status_id+'"]').find('.unread').remove();
 			}
 			updateBadge();
 		}
@@ -155,7 +203,7 @@
 			for (var i=0; i < safari.extension.bars.length; i++) {
 				bar = safari.extension.bars[i];
 				var direct_messages = bar.contentWindow.document.querySelector('.face.direct-messages');
-				$(direct_messages).find('[status_id="'+status_id+'"]').find('.unread').remove();
+				$(direct_messages).find('div[status_id="'+status_id+'"]').find('.unread').remove();
 			}
 			updateBadge();
 		}
@@ -318,7 +366,8 @@
 			}
 			return {user: user, type: type, tweet: tweet, status_id: status_id};
 		}
-		
+
+		//rewrite me from the ground up
 		function generateTweetBody(data,limit) {
 			if(typeof limit == 'undefined') {
 				limit = maxTweetsDisplayed;
@@ -342,7 +391,13 @@
 				if(type == 'tweet' || type == 'retweet') {
 					options = '<span title="Reply" class="reply"></span><span title="Retweet" class="retweet"></span>';
 				} else {
-					options = '<span title="Reply" class="dm-reply"></span>';
+					options = '<span title="Reply" class="dm-reply"></span><span title="Delete Tweet" class="dm-destroy"></span>';
+				}
+				//the ghetto hacks proliferate...
+				if(user.id == safari.extension.secureSettings.user_id && (type == 'tweet' || type == 'retweet')) {
+					options = '<span title="Delete Tweet" class="destroy"></span>';
+				} else if (user.id == safari.extension.secureSettings.user_id && type == 'dm') {
+					options = '<span title="Delete Tweet" class="dm-destroy"></span>';
 				}
 				
 				var shameful_retweet_hack;
@@ -392,11 +447,12 @@
 					notFavoriteShow = 'show';
 				}
 				var overlay= '<div class="overlay"><span class="favorite not-favorite '+notFavoriteShow+'">&#x2606;</span><span class="favorite is-favorite '+isFavoriteShow+'">&#x2605;</span></div>';
+				var activity = '<div class="activity"><img src="icons/activity.gif" /></div>';
 				//replace with a new regex.
 				tweet = tweet.replace(/(^|[^a-z0-9_])@([a-z0-9_]+)/gi, '$1<a href="http://twitter.com/$2">@$2</a>');
 				tweet = tweet.replace(/#([a-z0-9]+)/gi, '<a href="http://twitter.com/#search?q=%23$1">#$1</a>');
 				
-				tweetBody += '<div class="tweet" type="'+type+'" status_id="'+status_id+'" screen_name="'+user.screen_name+'">'+overlay+unreadText+shameful_retweet_hack+'<a href="http://twitter.com/'+user.screen_name+'" title="'+user.screen_name+'"><img class="avatar" src="'+user.profile_image_url+'"/></a><div class="options">'+options+'</div><div class="content" title="'+escaped_tweet+'">'+ tweet + '</div></div>';
+				tweetBody += '<div class="tweet" type="'+type+'" status_id="'+status_id+'" screen_name="'+user.screen_name+'">'+activity+overlay+unreadText+shameful_retweet_hack+'<a href="http://twitter.com/'+user.screen_name+'" title="'+user.screen_name+'"><img class="avatar" src="'+user.profile_image_url+'"/></a><div class="options">'+options+'</div><div class="content" title="'+escaped_tweet+'">'+ tweet + '</div></div>';
 			}
 			return tweetBody;
 		}

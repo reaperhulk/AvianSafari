@@ -84,6 +84,12 @@ function Avian(params) {
 			concat: true,
 			auth: true
 		},
+		'destroy': {
+			url:	'https://api.twitter.com/1/statuses/destroy/',
+			method: 'POST',
+			concat: true,
+			auth: true
+		},
 		'direct_messages': {
 			url:	'https://api.twitter.com/1/direct_messages.json',
 			method: 'GET',
@@ -351,6 +357,27 @@ Avian.prototype = {
 		}
 	},
 	
+	destroyTweet: function(status_id,userSuccessCallback,userErrorCallback) {
+		var self = this;
+		function destroySuccessCallback(data) {
+			//rip it out of our timeline object
+			if(typeof self.responses.home_timeline != 'undefined') {
+				for(var i=0;i < self.responses.home_timeline.length;i++) {
+					if(self.responses.home_timeline[i].id == status_id) {
+						self.arrayRemove(self.responses.home_timeline,i);
+						break;
+					}
+				}
+			}
+			if(typeof userSuccessCallback == 'function') { userSuccessCallback(data); }
+		}
+		function destroyErrorCallback(errorThrown) {
+			self.logging('destroy failed on xhr');
+			if(typeof userErrorCallback == 'function') { userErrorCallback(errorThrown); }
+		}
+		this.queryTwitter('destroy',{status_id:status_id},destroySuccessCallback,destroyErrorCallback);
+	},
+	
 	getThread: function(status_id,userSuccessCallback,userErrorCallback) {
 		this.responses.thread = [];
 		var self = this;
@@ -430,8 +457,31 @@ Avian.prototype = {
 	},
 
 	destroyDirectMessage: function(status_id,userSuccessCallback,userErrorCallback) {
-		//TODO: delete from DMs object + metadata
-		this.queryTwitter('dm_destroy',{status_id:status_id},userSuccessCallback,userErrorCallback);
+		var self = this;
+		function destroySuccessCallback(data) {
+			//rip it out of our direct message objects
+			var found = false;
+			if(typeof self.responses.direct_messages != 'undefined') {
+				for(var i=0;i < self.responses.direct_messages.length;i++) {
+					if(self.responses.direct_messages[i].id == status_id) {
+						found = true;
+						self.arrayRemove(self.responses.direct_messages,i);
+						break;
+					}
+				}
+			}
+			if(typeof self.responses.dm_sent != 'undefined' && found != true) {
+				for(var j=0;j < self.responses.dm_sent.length;j++) {
+					if(self.responses.dm_sent[j].id == status_id) {
+						found = true;
+						self.arrayRemove(self.responses.dm_sent,j);
+						break;
+					}
+				}
+			}
+			if(typeof userSuccessCallback == 'function') { userSuccessCallback(data); }
+		}
+		this.queryTwitter('dm_destroy',{status_id:status_id},destroySuccessCallback,userErrorCallback);
 	},
 
 	//convenience method to mimic getTweet. no equivalent API call, so it has to be present in the response arrays
@@ -639,5 +689,12 @@ Avian.prototype = {
 				console.log(data);
 			} catch(e) {}
 		}
+	},
+
+	// Array Remove - By John Resig (MIT Licensed)
+	arrayRemove: function(array, from, to) {
+	  var rest = array.slice((to || from) + 1 || array.length);
+	  array.length = from < 0 ? array.length + from : from;
+	  return array.push.apply(array, rest);
 	}
 };

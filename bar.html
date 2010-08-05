@@ -580,7 +580,7 @@ $(document).ready(function() {
 				allowedMaxWidth = 151; //reduce total width to try to handle the case where there's no space but we need to show the reply/retweet column
 			}
 			content.css('max-width',allowedMaxWidth);
-			options.stop(true).delay(600).animate({width:'14px',height:'22px'},200);
+			options.stop(true).delay(600).animate({width:'14px',height:'25px'},200);
 		} else {
 			options.stop(true).delay(600).animate({width:'1px',height:'1px'},200);
 			content.css('max-width',151);
@@ -616,6 +616,26 @@ $(document).ready(function() {
 		*/
 		g.markTweetAsRead(status_id);
 		dmReplySetup(status_id);
+	});
+
+	$('.tweet .destroy').live('click', function(event) {
+		var tweet = $(this).parent().parent();
+		var status_id = tweet.attr('status_id');
+		if(!confirm('Are you sure you want to delete this tweet? This cannot be undone.')) {
+			return;
+		}
+		tweet.find('.activity').fadeIn();
+		g.destroyTweet(status_id);
+	});
+
+	$('.tweet .dm-destroy').live('click', function(event) {
+		var tweet = $(this).parent().parent();
+		var status_id = tweet.attr('status_id');
+		if(!confirm('Are you sure you want to delete this DM? This cannot be undone.')) {
+			return;
+		}
+		tweet.find('.activity').fadeIn();
+		g.destroyDM(status_id);
 	});
 
 	$('#box-container').live('mousewheel', function(event) {

@@ -145,22 +145,33 @@ img.avatar-retweet {
 	height:11px;
 	margin-bottom:3px;
 	width:11px;
-	background:url(icons/reply-retweet.png) no-repeat 0px 0px;
+	background:url(icons/reply-retweet-delete.png) no-repeat 0px 0px;
 }
 
 .reply:hover,.dm-reply:hover {
-	background:url(icons/reply-retweet.png) no-repeat -11px 0px;
+	background:url(icons/reply-retweet-delete.png) no-repeat -11px 0px;
 }
 
 .retweet {
 	display:inline-block;
 	height:8px;
 	width:14px;
-	background:url(icons/reply-retweet.png) no-repeat 0px -11px;
+	background:url(icons/reply-retweet-delete.png) no-repeat 0px -11px;
 }
 
 .retweet:hover {
-	background:url(icons/reply-retweet.png) no-repeat -14px -11px;
+	background:url(icons/reply-retweet-delete.png) no-repeat -14px -11px;
+}
+
+.destroy,.dm-destroy {
+	display:inline-block;
+	height:10px;
+	width:11px;
+	background:url(icons/reply-retweet-delete.png) no-repeat 0px -19px;
+}
+
+.destroy:hover,.dm-destroy:hover {
+	background:url(icons/reply-retweet-delete.png) no-repeat -15px -19px;
 }
 
 #controls {
@@ -229,4 +240,21 @@ img.avatar-retweet {
 	left:432px;
 	top:2px;
 	display:none;
+}
+
+.activity {
+	position:absolute;
+	top:0;
+	left:0;
+	display:none;
+	width:100%;
+	height:100%;
+	background:black;
+	color:white;
+	opacity: 0.6;
+}
+.activity img {
+	position:absolute;
+	left:50%;
+	top:25%;
 }
