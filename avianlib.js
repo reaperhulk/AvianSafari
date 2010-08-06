@@ -658,16 +658,30 @@ Avian.prototype = {
 		return this.metadata.tweets[status_id];
 	},
 
-	//returns number of tweets present in the home_timeline array, or false if it doesn't exist
-	//slightly complicated by the fact that 0 and false will evaluate the same with ==. use ===
-	numTweetsInTimeline : function() {
+	//returns number of tweets present in the home_timeline, mentions, dm sent, and dm received arrays
+	numTweetsInTimelines : function() {
+		var response = {home_timeline:0,mentions:0,direct_messages:0,dm_sent:0};
 		try {
-			if(this.responses.home_timeline.length >= 0) {
-				return this.responses.home_timeline.length;
-			}
+			response.home_timeline = (this.responses.home_timeline.length > 0)?this.responses.home_timeline.length:0;
 		} catch(e) {
-			return false;
+			response.home_timeline = 0;
 		}
+		try {
+			response.mentions = (this.responses.mentions.length > 0)?this.responses.mentions.length:0;
+		} catch(e) {
+			response.mentions = 0;
+		}
+		try {
+			response.direct_messages = (this.responses.direct_messages.length > 0)?this.responses.direct_messages.length:0;
+		} catch(e) {
+			response.direct_messages = 0;
+		}
+		try {
+			response.dm_sent = (this.responses.dm_sent.length > 0)?this.responses.dm_sent.length:0;
+		} catch(e) {
+			response.dm_sent = 0;
+		}
+		return response;
 	},
 
 	//returns true if oauth is complete, false in any other scenario (ie, request token present but not access token)

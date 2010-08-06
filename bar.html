@@ -54,35 +54,23 @@ function checkAuthAndStatus() {
 	}
 	if(authStatus) {
 		$('#auth-status').hide();
-		if(g.Avian.numTweetsInTimeline() !== false) {
-			//TODO, this is a bug. it checks to see if the timeline is populated, then assumes mentions and DMs are too. this will MOSTLY be true, but not if some calls fail to twitter and others do not.
-			if(tweetsLoaded == false) {
+		$('#tweet-load').show();
+		var count = g.Avian.numTweetsInTimelines();
+		if(count.home_timeline == 0 && count.mentions == 0 && count.direct_messages == 0 && count.dm_sent == 0) {
+			g.setUpdateInterval(safari.extension.settings.getItem('updateInterval'),true);
+			g.updateData();
+		} else {
+			if(tweetsLoaded == false && count.home_timeline > 0) {
 				g.populateTweetBar(safari.self);
 			}
-			if(mentionsLoaded == false) {
+			if(mentionsLoaded == false && count.mentions > 0) {
 				g.populateMentionsBar(safari.self);
 			}
-			if(directMessagesLoaded == false) {
+			if(directMessagesLoaded == false && count.direct_messages > 0) {
 				g.populateDMBar(safari.self);
 			}
-			if(directMessagesSentLoaded == false) {
+			if(directMessagesSentLoaded == false && count.dm_sent > 0) {
 				g.populateSentDMBar(safari.self);
-			}
-			g.setUpdateInterval();
-		} else {
-			//we are authorized but no tweets have been fetched. set the update interval and do an 
-			//initial timeline load.
-			$('#tweet-load').show();
-			/*
-			sets the update interval. returns true if set, false if it's already set.
-			this prevents an edge case where at the end of auth the bars all attempt to load
-			the timeline, which would cause duplicate (or triplicate, etc) entries in the 
-			responses object.
-			*/
-			if(g.setUpdateInterval()) {
-				g.updateData();
-			} else {
-				console.log('did not set update interval. returned false');
 			}
 		}
 	} else {

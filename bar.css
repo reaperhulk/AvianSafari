@@ -139,7 +139,7 @@ img.avatar-retweet {
 	height:29px;
 }
 
-#auth-status, #tweet-load {
+#auth-status {
 	display:none;
 }
 

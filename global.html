@@ -39,6 +39,7 @@
 					for(var i=0;i < safari.extension.bars.length;i++) {
 						safari.extension.bars[i].contentWindow.checkAuthAndStatus();
 					}
+					setUpdateInterval();
 				}
 				function error(data) {
 					for (var i=0;i < safari.extension.bars.length;i++) {
@@ -93,47 +94,79 @@
 		}
 
 		function updateTimeline() {
-			function success(data) {
+			function successUpdateTimeline(data) {
 				if(Avian.unreadTweets > maxTweetsDisplayed) {
 					Avian.unreadTweets = maxTweetsDisplayed;
 				}
 				updateBadge();
 				populateOrUpdateTweetBars(data);
 			}
-			Avian.getHomeTimeline({},success);
+			function errorUpdateTimeline(error) {
+				for (var i=0; i < safari.extension.bars.length; i++) {
+					bar = safari.extension.bars[i];
+					if(!bar.contentWindow.document.tweetsLoaded) {
+						bar.contentWindow.document.getElementById('tweet-load').innerHTML = 'Error loading home timeline. Twitter is probably down. Click reload to try again.';
+					}
+				}
+			}
+			Avian.getHomeTimeline({},successUpdateTimeline,errorUpdateTimeline);
 		}
 
 		function updateMentions() {
-			function success(data) {
+			function successMentions(data) {
 				if(Avian.unreadMentions > maxTweetsDisplayed) {
 					Avian.unreadMentions = maxTweetsDisplayed;
 				}
 				updateBadge();
 				populateOrUpdateMentionsBars(data);
 			}
-			Avian.getMentions({},success);
+			function errorMentions(error) {
+				for (var i=0; i < safari.extension.bars.length; i++) {
+					bar = safari.extension.bars[i];
+					if(!bar.contentWindow.document.mentionsLoaded) {
+						bar.contentWindow.document.getElementById('mentions-load').innerHTML = 'Error loading mentions timeline. Twitter is probably down. Click reload to try again.';
+					}
+				}
+			}
+			Avian.getMentions({},successMentions,errorMentions);
 		}
 		
 		function updateDirectMessages() {
-			function success(data) {
+			function successReceivedDM(data) {
 				if(Avian.unreadDMs > maxTweetsDisplayed) {
 					Avian.unreadDMs = maxTweetsDisplayed;
 				}
 				updateBadge();
 				populateOrUpdateDMBars(data);
 			}
-			Avian.getDirectMessages('received',{},success);
+			function errorReceivedDM(error) {
+				for (var i=0; i < safari.extension.bars.length; i++) {
+					bar = safari.extension.bars[i];
+					if(!bar.contentWindow.document.directMessagesLoaded) {
+						bar.contentWindow.document.getElementById('dm-received-load').innerHTML = 'Error loading received DMs. Twitter is probably down. Click reload to try again.';
+					}
+				}
+			}
+			Avian.getDirectMessages('received',{},successReceivedDM,errorReceivedDM);
 		}
 
 		function updateSentDirectMessages() {
-			function success(data) {
+			function successSentDM(data) {
 				if(Avian.unreadDMs > maxTweetsDisplayed) {
 					Avian.unreadDMs = maxTweetsDisplayed;
 				}
 				updateBadge();
 				populateOrUpdateSentDMBars(data);
 			}
-			Avian.getDirectMessages('sent',{},success);
+			function errorSentDM(error) {
+				for (var i=0; i < safari.extension.bars.length; i++) {
+					bar = safari.extension.bars[i];
+					if(!bar.contentWindow.document.directMessagesSentLoaded) {
+						bar.contentWindow.document.getElementById('dm-sent-load').innerHTML = 'Error loading sent DMs. Twitter is probably down. Click reload to try again.';
+					}
+				}
+			}
+			Avian.getDirectMessages('sent',{},successSentDM,errorSentDM);
 		}
 
 		function destroyTweet(status_id) {
@@ -227,7 +260,7 @@
 			saveObjects();
 		}
 
-		function populateOrUpdateTweetBars(data){
+		function populateOrUpdateTweetBars(data) {
 			var tweetBody = generateTweetBody(data);
 			for (var k=0; k < safari.extension.bars.length; k++) {
 				bar = safari.extension.bars[k];
@@ -249,8 +282,8 @@
 		function populateTweetBar(bar) {
 			var container = bar.contentWindow.document.querySelector('.face.timeline');
 			var tweetLoad = bar.contentWindow.document.querySelector('#tweet-load');
-			$(tweetLoad).hide();
 			var tweetBody = generateTweetBody(Avian.responses.home_timeline);
+			$(tweetLoad).hide();
 			$(tweetBody).prependTo($(container));
 			bar.contentWindow.tweetsLoaded = true;
 		}
@@ -277,8 +310,8 @@
 		function populateMentionsBar(bar) {
 			var container = bar.contentWindow.document.querySelector('.face.mentions');
 			var mentionsLoad = bar.contentWindow.document.querySelector('#mentions-load');
-			$(mentionsLoad).hide();
 			var tweetBody = generateTweetBody(Avian.responses.mentions);
+			$(mentionsLoad).hide();
 			$(tweetBody).prependTo($(container));
 			bar.contentWindow.mentionsLoaded = true;
 		}
@@ -305,8 +338,8 @@
 		function populateDMBar(bar) {
 			var container = bar.contentWindow.document.querySelector('.direct-messages-received');
 			var receivedLoad = bar.contentWindow.document.querySelector('#dm-received-load');
-			$(receivedLoad).hide();
 			var tweetBody = generateTweetBody(Avian.responses.direct_messages);
+			$(receivedLoad).hide();
 			$(tweetBody).prependTo($(container));
 			bar.contentWindow.directMessagesLoaded = true;
 		}
@@ -333,8 +366,8 @@
 		function populateSentDMBar(bar) {
 			var container = bar.contentWindow.document.querySelector('.direct-messages-sent');
 			var sentLoad = bar.contentWindow.document.querySelector('#dm-sent-load');
-			$(sentLoad).hide();
 			var tweetBody = generateTweetBody(Avian.responses.dm_sent);
+			$(sentLoad).hide();
 			$(tweetBody).prependTo($(container));
 			bar.contentWindow.directMessagesSentLoaded = true;
 		}
