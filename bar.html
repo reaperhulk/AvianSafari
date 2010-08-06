@@ -56,8 +56,6 @@ function checkAuthAndStatus() {
 		$('#auth-status').hide();
 		if(g.Avian.numTweetsInTimeline() !== false) {
 			//TODO, this is a bug. it checks to see if the timeline is populated, then assumes mentions and DMs are too. this will MOSTLY be true, but not if some calls fail to twitter and others do not.
-			$('#initial-load').hide();
-			$('.generic').hide(); //TODO: better handling of the initial text on the alternate faces of the box
 			if(tweetsLoaded == false) {
 				g.populateTweetBar(safari.self);
 			}
@@ -74,7 +72,7 @@ function checkAuthAndStatus() {
 		} else {
 			//we are authorized but no tweets have been fetched. set the update interval and do an 
 			//initial timeline load.
-			$('#initial-load').show();
+			$('#tweet-load').show();
 			/*
 			sets the update interval. returns true if set, false if it's already set.
 			this prevents an edge case where at the end of auth the bars all attempt to load
@@ -89,7 +87,7 @@ function checkAuthAndStatus() {
 		}
 	} else {
 		$('#auth-status').show();
-		$('#initial-load').hide();
+		$('#tweet-load').hide();
 	}
 }
 
@@ -669,14 +667,15 @@ $(document).ready(function() {
 		return false;
 	});
 
-	$('.tweet').live('contextmenu',function() {
+	//commented out for initial release.
+	/*$('.tweet').live('contextmenu',function() {
 		if ($(this).attr('type') == 'dm') {
 			return false;
 		}
 		var overlay= $(this).find('.overlay');
 		overlay.animate({ left: parseInt(overlay.css('left'),10) == 0 ?400:0});
 		return false;
-	});
+	});*/
 
 	$('.tweet .overlay .is-favorite').live('click', function() {
 		var status_id = $(this).parent().parent().attr('status_id');
@@ -721,24 +720,24 @@ $(document).ready(function() {
 			<div id="auth-status">
 				Authorization required. Click this bar to authorize.
 			</div>
-			<div id="initial-load">
-				Loading Twitter feed...
+			<div id="tweet-load">
+				Loading Twitter Home Timeline...
 			</div>
 		</div>
 		<div class="face bottom mentions">
-			<div class="generic">
-				Mentions
+			<div id="mentions-load">
+				Loading Twitter Mentions...
 			</div>
 		</div>
 		<div class="face back direct-messages">
 			<div class="direct-messages-received direct-messages">
-				<div class="generic">
-					DMs Received
+				<div id="dm-received-load">
+					Loading Received DMs...
 				</div>
 			</div>
 			<div class="direct-messages-sent direct-messages" style="display:none">
-				<div class="generic">
-					DMs Sent
+				<div id="dm-sent-load">
+					Loading Sent DMs...
 				</div>
 			</div>
 			<div style="position:absolute;right:0;top:0;width:21px;text-align:right">

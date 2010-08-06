@@ -248,8 +248,8 @@
 		
 		function populateTweetBar(bar) {
 			var container = bar.contentWindow.document.querySelector('.face.timeline');
-			var initialLoad = bar.contentWindow.document.querySelector('#initial-load');
-			$(initialLoad).hide();
+			var tweetLoad = bar.contentWindow.document.querySelector('#tweet-load');
+			$(tweetLoad).hide();
 			var tweetBody = generateTweetBody(Avian.responses.home_timeline);
 			$(tweetBody).prependTo($(container));
 			bar.contentWindow.tweetsLoaded = true;
@@ -276,8 +276,8 @@
 		
 		function populateMentionsBar(bar) {
 			var container = bar.contentWindow.document.querySelector('.face.mentions');
-			var initialLoad = bar.contentWindow.document.querySelector('#initial-load');
-			$(initialLoad).hide();
+			var mentionsLoad = bar.contentWindow.document.querySelector('#mentions-load');
+			$(mentionsLoad).hide();
 			var tweetBody = generateTweetBody(Avian.responses.mentions);
 			$(tweetBody).prependTo($(container));
 			bar.contentWindow.mentionsLoaded = true;
@@ -304,8 +304,8 @@
 		
 		function populateDMBar(bar) {
 			var container = bar.contentWindow.document.querySelector('.direct-messages-received');
-			var initialLoad = bar.contentWindow.document.querySelector('#initial-load');
-			$(initialLoad).hide();
+			var receivedLoad = bar.contentWindow.document.querySelector('#dm-received-load');
+			$(receivedLoad).hide();
 			var tweetBody = generateTweetBody(Avian.responses.direct_messages);
 			$(tweetBody).prependTo($(container));
 			bar.contentWindow.directMessagesLoaded = true;
@@ -332,8 +332,8 @@
 		
 		function populateSentDMBar(bar) {
 			var container = bar.contentWindow.document.querySelector('.direct-messages-sent');
-			var initialLoad = bar.contentWindow.document.querySelector('#initial-load');
-			$(initialLoad).hide();
+			var sentLoad = bar.contentWindow.document.querySelector('#dm-sent-load');
+			$(sentLoad).hide();
 			var tweetBody = generateTweetBody(Avian.responses.dm_sent);
 			$(tweetBody).prependTo($(container));
 			bar.contentWindow.directMessagesSentLoaded = true;
