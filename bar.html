@@ -20,11 +20,7 @@ function captureCommand(event) {
 	if (event.command !== 'aviansafari-toggle') {
 		return;
 	}
-	if(safari.self.visible) {
-		safari.self.hide();
-	} else {
-		safari.self.show();
-	}
+	showTweetFace();
 }
 
 function captureMessage(event) {
@@ -416,6 +412,16 @@ function currentTabIndex() {
 	return false;
 }
 
+function showTweetFace() {
+	$('.create-tweet .in_reply_to_status_id').val('');
+	$('.create-tweet textarea').val('').focus();
+	checkTweetLength();
+	$('.create-tweet .replying-to-tweet').empty();
+	$('#controls button').removeClass('toggled');
+	$(this).addClass('toggled');
+	document.querySelector('#box-container').className = 'show-top';
+}
+
 $(document).ready(function() {
 	$('#auth-status').click(function() {
 		var self = this;
@@ -431,13 +437,7 @@ $(document).ready(function() {
 	});
 
 	$('#status-update').click(function() {
-		$('.create-tweet .in_reply_to_status_id').val('');
-		$('.create-tweet textarea').val('').focus();
-		checkTweetLength();
-		$('.create-tweet .replying-to-tweet').empty();
-		$('#controls button').removeClass('toggled');
-		$(this).addClass('toggled');
-		document.querySelector('#box-container').className = 'show-top';
+		showTweetFace();
 		return false;
 	});
 
@@ -509,8 +509,11 @@ $(document).ready(function() {
 	});
 
 	$('#get-current-link').click(function() {
-		var tweetText = $('.create-tweet .tweet-text').val();
-		$('.create-tweet .tweet-text').val(tweetText+safari.application.activeBrowserWindow.activeTab.url);
+		var tweetText = $('.create-tweet .tweet-text');
+		$(tweetText).val(tweetText.val()+safari.application.activeBrowserWindow.activeTab.url);
+		var range = tweetText.val().length;
+		tweetText.focus();
+		tweetText.get(0).setSelectionRange(range,range); //set the cursor to the end.
 		return false;
 	});
 
@@ -746,7 +749,7 @@ $(document).ready(function() {
 				<button id="shorten" style="width:50px;padding:0" title="Shorten Links (&#x21e7;&#x2318;L)">Shorten</button>
 			</div>
 			<div style="display:inline-block;vertical-align:top">
-				<button id="get-current-link" style="width:20;padding:0" title="Insert Current Tab URL Into Tweet">&#x21B2;</button>
+				<button id="get-current-link" style="width:20;padding:0" title="Insert Current Tab URL Into Tweet"><img src="icons/link.png" /></button>
 			</div>
 			<div style="float:right" class="replying-to-tweet"></div>
 		</div>

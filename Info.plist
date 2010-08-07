@@ -37,7 +37,7 @@
 				<key>Identifier</key>
 				<string>com.languish.aviansafari</string>
 				<key>Image</key>
-				<string>icons/avian.png</string>
+				<string>icons/avian_toolbar.png</string>
 				<key>Include By Default</key>
 				<true/>
 				<key>Label</key>
