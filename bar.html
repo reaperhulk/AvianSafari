@@ -514,6 +514,7 @@ $(document).ready(function() {
 		var range = tweetText.val().length;
 		tweetText.focus();
 		tweetText.get(0).setSelectionRange(range,range); //set the cursor to the end.
+		checkTweetLength();
 		return false;
 	});
 

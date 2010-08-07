@@ -377,6 +377,7 @@
 			var type;
 			var tweet;
 			var status_id;
+			var retweetAvatarOverlay;
 			if(typeof obj.user == 'object') {
 				if(typeof obj.retweeted_status == 'object') {
 					//this is a retweet. let's pull the original text
@@ -384,11 +385,13 @@
 					user = obj.retweeted_status.user;
 					tweet = obj.retweeted_status.text;
 					status_id = obj.id; //this is the retweet id, do we want the original tweet id
+					retweetAvatarOverlay = '<a class="avatar-retweet" href="http://twitter.com/'+data[i].user.screen_name+'" title="'+data[i].user.screen_name+'"><img class="avatar-retweet" src="'+data[i].user.profile_image_url+'" /></a>';
 				} else {
 					user = obj.user;
 					type = 'tweet';
 					tweet = obj.text;
 					status_id = obj.id;
+					retweetAvatarOverlay = '';
 				}
 			} else {
 				//DMs have sender/recipient, not user.
@@ -396,8 +399,74 @@
 				type = 'dm';
 				tweet = obj.text;
 				status_id = obj.id;
+				retweetAvatarOverlay = '';
 			}
-			return {user: user, type: type, tweet: tweet, status_id: status_id};
+			return {user: user, type: type, tweet: tweet, status_id: status_id, retweetAvatarOverlay: retweetAvatarOverlay};
+		}
+
+		function generateUnreadStatus(type,status_id) {
+			var unread;
+			if(type == 'tweet' || type == 'retweet') {
+				try {
+					unread = Avian.getTweetMetadata(status_id).unread;
+				} catch(e) {
+					this.logging('no tweet metadata for status_id: '+status_id);
+					unread = true;
+				}
+			} else if (type == 'dm') {
+				try {
+					unread = Avian.getDMMetadata(status_id).unread;
+				} catch(e) {
+					this.logging('no tweet metadata for status_id: '+status_id);
+					unread = true;
+				}
+			}
+			return (unread)?'<span class="unread">&#x25cf;</span>':'';
+		}
+
+		function generateTweetOptions(type,user) {
+			var options;
+			if(type == 'tweet' || type == 'retweet') {
+				options = '<span title="Reply" class="reply"></span><span title="Retweet" class="retweet"></span>';
+			} else {
+				options = '<span title="Reply" class="dm-reply"></span><span title="Delete Tweet" class="dm-destroy"></span>';
+			}
+			//the ghetto hacks proliferate...
+			if(user.id == safari.extension.secureSettings.user_id && (type == 'tweet' || type == 'retweet')) {
+				options = '<span title="Delete Tweet" class="destroy"></span>';
+			} else if (user.id == safari.extension.secureSettings.user_id && type == 'dm') {
+				options = '<span title="Delete Tweet" class="dm-destroy"></span>';
+			}
+			return options;
+		}
+
+		function generateTweetLinks(tweet) {
+			var matches = tweet.match(/\b((?:[a-z][\w-]+:(?:\/{1,3}|[a-z0-9%])|www\d{0,3}[.])(?:[^\s()<>]+|\([^\s()<>]+\))+(?:\([^\s()<>]+\)|[^`!()\[\]{};:'".,<>?«»“”‘’\s]))/gi);
+			if (matches){
+				for (var j=0; j < matches.length; j++) {
+					var actualUrl;
+					if(matches[j].match(/http/) === null) {
+						actualUrl = 'http://'+matches[j];
+					} else {
+						actualUrl = matches[j];
+					}
+					tweet = tweet.replace(matches[j],'<a href="'+actualUrl+'">'+matches[j]+'</a>');
+				}
+			}
+			return tweet;
+		}
+
+		function generateTweetOverlay(data) {
+			var isFavoriteShow;
+			var notFavoriteShow;
+			if(data.favorited) {
+				isFavoriteShow = 'show';
+				notFavoriteShow = '';
+			} else {
+				isFavoriteShow = '';
+				notFavoriteShow = 'show';
+			}
+			return '<div class="overlay"><span class="favorite not-favorite '+notFavoriteShow+'">&#x2606;</span><span class="favorite is-favorite '+isFavoriteShow+'">&#x2605;</span></div>';
 		}
 
 		//rewrite me from the ground up
@@ -414,78 +483,26 @@
 			var tweetBody;
 			//we iterate only up to the limit we allow.
 			for (var i=0; i < limit; i++) {
+				var overlay = generateTweetOverlay(data[i]);
 				var returned = generateTweetInfo(data[i]);
 				var user = returned.user;
 				var type = returned.type;
 				var tweet = returned.tweet;
 				var status_id = returned.status_id;
+				var retweetAvatarOverlay = returned.retweetAvatarOverlay;
 				
-				var options;
-				if(type == 'tweet' || type == 'retweet') {
-					options = '<span title="Reply" class="reply"></span><span title="Retweet" class="retweet"></span>';
-				} else {
-					options = '<span title="Reply" class="dm-reply"></span><span title="Delete Tweet" class="dm-destroy"></span>';
-				}
-				//the ghetto hacks proliferate...
-				if(user.id == safari.extension.secureSettings.user_id && (type == 'tweet' || type == 'retweet')) {
-					options = '<span title="Delete Tweet" class="destroy"></span>';
-				} else if (user.id == safari.extension.secureSettings.user_id && type == 'dm') {
-					options = '<span title="Delete Tweet" class="dm-destroy"></span>';
-				}
-				
-				var shameful_retweet_hack;
-				if(type == 'retweet') {
-					shameful_retweet_hack = '<a class="avatar-retweet" href="http://twitter.com/'+data[i].user.screen_name+'" title="'+data[i].user.screen_name+'"><img class="avatar-retweet" src="'+data[i].user.profile_image_url+'" /></a>';
-				} else {
-					shameful_retweet_hack = '';
-				}
-				
-				var unread;
-				if(type == 'tweet' || type == 'retweet') {
-					try {
-						unread = Avian.getTweetMetadata(status_id).unread;
-					} catch(e) {
-						console.log('no tweet metadata for status_id: '+status_id);
-						unread = true;
-					}
-				} else if (type == 'dm') {
-					try {
-						unread = Avian.getDMMetadata(status_id).unread;
-					} catch(e) {
-						console.log('no tweet metadata for status_id: '+status_id);
-						unread = true;
-					}
-				}
-				var unreadText = (unread)?'<span class="unread">&#x25cf;</span>':'';
-				var escaped_tweet = data[i].text.replace(/\"/g,'&quot;');
-				var matches = tweet.match(/\b((?:[a-z][\w-]+:(?:\/{1,3}|[a-z0-9%])|www\d{0,3}[.])(?:[^\s()<>]+|\([^\s()<>]+\))+(?:\([^\s()<>]+\)|[^`!()\[\]{};:'".,<>?«»“”‘’\s]))/gi);
-				if (matches){
-					for (var j=0; j < matches.length; j++) {
-						var actualUrl;
-						if(matches[j].match(/http/) === null) {
-							actualUrl = 'http://'+matches[j];
-						} else {
-							actualUrl = matches[j];
-						}
-						tweet = tweet.replace(matches[j],'<a href="'+actualUrl+'">'+matches[j]+'</a>');
-					}
-				}
-				var isFavoriteShow;
-				var notFavoriteShow;
-				if(data[i].favorited) {
-					isFavoriteShow = 'show';
-					notFavoriteShow = '';
-				} else {
-					isFavoriteShow = '';
-					notFavoriteShow = 'show';
-				}
-				var overlay= '<div class="overlay"><span class="favorite not-favorite '+notFavoriteShow+'">&#x2606;</span><span class="favorite is-favorite '+isFavoriteShow+'">&#x2605;</span></div>';
-				var activity = '<div class="activity"><img src="icons/activity.gif" /></div>';
+				var options = generateTweetOptions(type,user);
+				var unreadStatus = generateUnreadStatus(type,status_id);
+				//escaped tweet is semi-wrong for retweets. may also want to prepend user to the front to make the tooltip better
+				var escapedTweet = data[i].text.replace(/\"/g,'&quot;');
+
+				tweet = generateTweetLinks(tweet);
+
 				//replace with a new regex.
 				tweet = tweet.replace(/(^|[^a-z0-9_])@([a-z0-9_]+)/gi, '$1<a href="http://twitter.com/$2">@$2</a>');
 				tweet = tweet.replace(/#([a-z0-9]+)/gi, '<a href="http://twitter.com/#search?q=%23$1">#$1</a>');
 				
-				tweetBody += '<div class="tweet" type="'+type+'" status_id="'+status_id+'" screen_name="'+user.screen_name+'">'+activity+overlay+unreadText+shameful_retweet_hack+'<a href="http://twitter.com/'+user.screen_name+'" title="'+user.screen_name+'"><img class="avatar" src="'+user.profile_image_url+'"/></a><div class="options">'+options+'</div><div class="content" title="'+escaped_tweet+'">'+ tweet + '</div></div>';
+				tweetBody += '<div class="tweet" type="'+type+'" status_id="'+status_id+'" screen_name="'+user.screen_name+'"><div class="activity"><img src="icons/activity.gif" /></div>'+overlay+unreadStatus+retweetAvatarOverlay+'<a href="http://twitter.com/'+user.screen_name+'" title="'+user.screen_name+'"><img class="avatar" src="'+user.profile_image_url+'"/></a><div class="options">'+options+'</div><div class="content" title="'+escapedTweet+'">'+ tweet + '</div></div>';
 			}
 			return tweetBody;
 		}
