@@ -385,7 +385,7 @@
 					user = obj.retweeted_status.user;
 					tweet = obj.retweeted_status.text;
 					status_id = obj.id; //this is the retweet id, do we want the original tweet id
-					retweetAvatarOverlay = '<a class="avatar-retweet" href="http://twitter.com/'+data[i].user.screen_name+'" title="'+data[i].user.screen_name+'"><img class="avatar-retweet" src="'+data[i].user.profile_image_url+'" /></a>';
+					retweetAvatarOverlay = '<a class="avatar-retweet" href="http://twitter.com/'+obj.user.screen_name+'" title="'+obj.user.screen_name+'"><img class="avatar-retweet" src="'+obj.user.profile_image_url+'" /></a>';
 				} else {
 					user = obj.user;
 					type = 'tweet';
