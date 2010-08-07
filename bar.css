@@ -24,15 +24,15 @@ a {
 }
 
 .show-top {
-	-webkit-transform: translateZ(-15px) rotateX(-90deg);
+	-webkit-transform: translateZ(-15px) rotateX(270deg);
 }
 
 .show-bottom {
-	-webkit-transform: translateZ(-15px) rotateX(-270deg);
+	-webkit-transform: translateZ(-15px) rotateX(90deg);
 }
 
 .show-back {
-	-webkit-transform: translateZ(-15px) rotateX(-180deg);
+	-webkit-transform: translateZ(-15px) rotateX(180deg);
 }
 
 .face {
@@ -208,7 +208,6 @@ img.avatar-retweet {
 .tweet-text {
 	display:inline-block;
 	padding:0;
-	margin-top:1px;
 	width:450px;
 	height:27px;
 	font-size:9px;
