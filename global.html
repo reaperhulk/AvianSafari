@@ -442,7 +442,8 @@
 			return options;
 		}
 
-		function generateTweetLinks(tweet) {
+		function generateTweetLinks(tweet,entities) {
+			//use entities some day
 			var matches = tweet.match(/\b((?:[a-z][\w-]+:(?:\/{1,3}|[a-z0-9%])|www\d{0,3}[.])(?:[^\s()<>]+|\([^\s()<>]+\))+(?:\([^\s()<>]+\)|[^`!()\[\]{};:'".,<>?«»“”‘’\s]))/gi);
 			if (matches){
 				for (var j=0; j < matches.length; j++) {
@@ -457,7 +458,7 @@
 			}
 			//replace with a new regex.
 			tweet = tweet.replace(/(^|[^a-z0-9_])@([a-z0-9_]+)/gi, '$1<a href="http://twitter.com/$2">@$2</a>');
-			tweet = tweet.replace(/#([a-z0-9]+)/gi, '<a href="http://twitter.com/#search?q=%23$1">#$1</a>');
+			tweet = tweet.replace(/ #([-a-z0-9]+)/gi, ' <a href="http://twitter.com/#search?q=%23$1">#$1</a>');
 			return tweet;
 		}
 
@@ -501,7 +502,7 @@
 				
 				var escapedTweet = user.screen_name+': '+tweet.replace(/\"/g,'&quot;');
 				
-				tweet = generateTweetLinks(tweet);
+				tweet = generateTweetLinks(tweet,data[i].entities);
 				
 				tweetBody += '<div class="tweet" type="'+type+'" status_id="'+status_id+'" screen_name="'+user.screen_name+'"><div class="activity"><img src="icons/activity.gif" /></div>'+overlay+unreadStatus+retweetAvatarOverlay+'<a href="http://twitter.com/'+user.screen_name+'" title="'+user.screen_name+'"><img class="avatar" src="'+user.profile_image_url+'"/></a><div class="options">'+options+'</div><div class="content" title="'+escapedTweet+'">'+ tweet + '</div></div>';
 			}

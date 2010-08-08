@@ -574,11 +574,10 @@ $(document).ready(function() {
 		if(event.type == 'mouseover') {
 			var totalWidth = $(this).parent().width();
 			var currentEdge = $(this).position().left + $(this).width();
-
-			//var availableSpace = Math.floor((totalWidth - currentEdge - 28)*0.85); //arcane random numbers that seem to work.
+			
 			var availableSpace = totalWidth - currentEdge - 14; //14 for the width of the options div that will appear
 			var allowedMaxWidth = (availableSpace <= 185)?availableSpace+165:350;
-			if (availableSpace <= 14) {
+			if (availableSpace <= 0) {
 				allowedMaxWidth = 151; //reduce total width to try to handle the case where there's no space but we need to show the reply/retweet column
 			}
 			content.css('max-width',allowedMaxWidth);
