@@ -102,7 +102,7 @@ img.avatar-retweet {
 .content {
 	-webkit-transition: max-width 200ms ease 600ms;
 	min-width:151px;
-	max-width:151px;
+	max-width:165px;
 	display:inline-block;
 	font-size:9px;
 	line-height:13px;
