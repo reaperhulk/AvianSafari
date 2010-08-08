@@ -1,5 +1,7 @@
+<!DOCTYPE html>
 <html>
 <head>
+<title>AvianSafari Bar</title>
 <script src="jquery-1.4.2.min.js" type="text/javascript"></script>
 <script src="sha1.js" type="text/javascript"></script>
 <script src="avian_oauth.js" type="text/javascript"></script>
@@ -93,9 +95,7 @@ function replySetup(in_reply_to_status_id) {
 		var screen_name = returned.user.screen_name;
 		$('.create-tweet .in_reply_to_status_id').val(in_reply_to_status_id);
 		var tweetText = $('.create-tweet .tweet-text');
-		tweetText.val('@'+screen_name+' ').focus();
-		var range = tweetText.val().length;
-		tweetText.get(0).setSelectionRange(range,range); //set the cursor to the end.
+		tweetText.val('@'+screen_name+' ');
 		checkTweetLength();
 		var tweetHTML = g.generateTweetBody([data]);
 		var clonedTweet = $(tweetHTML);
@@ -106,6 +106,7 @@ function replySetup(in_reply_to_status_id) {
 		$('#controls button').removeClass('toggled');
 		$('#status-update').addClass('toggled');
 		document.querySelector('#box-container').className = 'show-top';
+		window.setTimeout("var tweetText = $('.create-tweet .tweet-text');var range = tweetText.val().length;tweetText.get(0).setSelectionRange(range,range);tweetText.focus();",1000);
 	}
 }
 
@@ -116,9 +117,7 @@ function dmReplySetup(status_id) {
 		var status_id = returned.status_id;
 		var screen_name = returned.user.screen_name;
 		var tweetText = $('.create-tweet .tweet-text');
-		tweetText.val('d '+screen_name+' ').focus();
-		var range = tweetText.val().length;
-		tweetText.get(0).setSelectionRange(range,range); //set the cursor to the end.
+		tweetText.val('d '+screen_name+' ');
 		checkTweetLength();
 		var tweetHTML = g.generateTweetBody([data]);
 		var clonedTweet = $(tweetHTML);
@@ -129,6 +128,7 @@ function dmReplySetup(status_id) {
 		$('#controls button').removeClass('toggled');
 		$('#status-update').addClass('toggled');
 		document.querySelector('#box-container').className = 'show-top';
+		window.setTimeout("var tweetText = $('.create-tweet .tweet-text');var range = tweetText.val().length;tweetText.get(0).setSelectionRange(range,range);tweetText.focus();",1000);
 	}
 }
 
@@ -414,12 +414,13 @@ function currentTabIndex() {
 
 function showTweetFace() {
 	$('.create-tweet .in_reply_to_status_id').val('');
-	$('.create-tweet textarea').val('').focus();
+	$('.create-tweet .tweet-text').val('');
 	checkTweetLength();
 	$('.create-tweet .replying-to-tweet').empty();
 	$('#controls button').removeClass('toggled');
 	$('#status-update').addClass('toggled');
 	document.querySelector('#box-container').className = 'show-top';
+	window.setTimeout("$('.create-tweet .tweet-text').focus()",1000);
 }
 
 $(document).ready(function() {
@@ -547,6 +548,16 @@ $(document).ready(function() {
 		$(this).addClass('toggled');
 	});
 
+	$('span.unread').live('click',function(event) {
+		var tweet = $(this).parent();
+		var type = tweet.attr('type');
+		if(type == 'tweet' || type == 'retweet') {
+			g.markTweetAsRead(tweet.attr('status_id'));
+		} else if (type == 'dm') {
+			g.markDMAsRead(tweet.attr('status_id'));
+		}
+	});
+
 	$('div[type=tweet] .content,div[type=retweet] .content').live('click', function(event) {
 		var tweet = $(this).parent();
 		g.markTweetAsRead(tweet.attr('status_id'));
@@ -565,15 +576,15 @@ $(document).ready(function() {
 			var currentEdge = $(this).position().left + $(this).width();
 
 			var availableSpace = Math.floor((totalWidth - currentEdge - 28)*0.85); //arcane random numbers that seem to work.
-			var allowedMaxWidth = (availableSpace <= 200)?availableSpace+151:350;
-			if (availableSpace < 14) {
+			var allowedMaxWidth = (availableSpace <= 185)?availableSpace+165:350;
+			if (availableSpace <= 14) {
 				allowedMaxWidth = 151; //reduce total width to try to handle the case where there's no space but we need to show the reply/retweet column
 			}
 			content.css('max-width',allowedMaxWidth);
 			options.stop(true).delay(600).animate({width:'14px',height:'25px'},200);
 		} else {
 			options.stop(true).delay(600).animate({width:'1px',height:'1px'},200);
-			content.css('max-width',151);
+			content.css('max-width',165);
 		}
 	});
 
@@ -692,9 +703,9 @@ $(document).ready(function() {
 </script>
 </head>
 <body>
-	<table id="controls" cellpadding="0" cellspacing="0">
+	<table id="controls">
 		<tr>
-		<td><button id="home-timeline" class="toggled" title="View Home Timeline"><img src="icons/home.png" style="width:10px;height:9px;margin-top:1px"/></button></td>
+		<td><button id="home-timeline" class="toggled" title="View Home Timeline"><img src="icons/home.png" style="width:10px;height:9px;margin-top:1px;"/></button></td>
 		<td><button id="mentions" title="View Mentions">@</button></td>
 		<td><button id="direct-messages" title="View Direct Messages"><img src="icons/direct_messages.png" style="width:10px;height:10px;margin-top:3px"/></button></td>
 		<td><button id="status-update" title="Compose Tweet">&#x270E;</button></td>
@@ -741,7 +752,7 @@ $(document).ready(function() {
 			<div style="position:relative;overflow:hidden;height:29px">
 				<div class="chars-left">140</div>
 				<img id="tweet-loading" src="icons/tweet-loading.gif" />
-				<form style="display:inline-block;margin-top:1px">
+				<form style="display:inline-block">
 					<input type="hidden" class="in_reply_to_status_id" name="in_reply_to_status_id" />
 					<textarea class="tweet-text"></textarea>
 				</form>
