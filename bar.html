@@ -770,23 +770,21 @@ $(document).ready(function() {
 			</div>
 		</div>
 		<div class="face top create-tweet">
-			<div style="position:relative;overflow:hidden;height:29px">
-				<div class="chars-left">140</div>
-				<img id="tweet-loading" src="icons/tweet-loading.gif" />
-				<form style="display:inline-block">
-					<input type="hidden" class="in_reply_to_status_id" name="in_reply_to_status_id" />
-					<textarea class="tweet-text"></textarea>
-				</form>
-				<div style="display:inline-block;vertical-align:top">
-					<button id="send-tweet" style="width:40px;padding:0" title="Send Tweet (&#x2318;&#x21a9;)">Send</button>
-					<br/>
-					<button id="shorten" style="width:50px;padding:0" title="Shorten Links (&#x21e7;&#x2318;L)">Shorten</button>
-				</div>
-				<div style="display:inline-block;vertical-align:top">
-					<button id="get-current-link" style="width:20;padding:0" title="Insert Current Tab URL Into Tweet"><img src="icons/link.png" /></button>
-				</div>
-				<div style="float:right" class="replying-to-tweet"></div>
+			<div class="chars-left">140</div>
+			<img id="tweet-loading" src="icons/tweet-loading.gif" />
+			<form style="display:inline-block">
+				<input type="hidden" class="in_reply_to_status_id" name="in_reply_to_status_id" />
+				<textarea class="tweet-text"></textarea>
+			</form>
+			<div style="display:inline-block;vertical-align:top">
+				<button id="send-tweet" style="width:40px;padding:0" title="Send Tweet (&#x2318;&#x21a9;)">Send</button>
+				<br/>
+				<button id="shorten" style="width:50px;padding:0" title="Shorten Links (&#x21e7;&#x2318;L)">Shorten</button>
 			</div>
+			<div style="display:inline-block;vertical-align:top">
+				<button id="get-current-link" style="width:20;padding:0" title="Insert Current Tab URL Into Tweet"><img src="icons/link.png" /></button>
+			</div>
+			<div style="float:right" class="replying-to-tweet"></div>
 		</div>
 	</div>
 </body>
