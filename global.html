@@ -102,6 +102,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 			updateMentions();
 			updateDirectMessages();
 			updateSentDirectMessages();
+			updateTrends();
 		}
 
 		function saveObjects() {
@@ -188,6 +189,35 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 				}
 			}
 			Avian.getDirectMessages('sent',{},successSentDM,errorSentDM);
+		}
+
+		function updateTrends() {
+			function successTrends(data) {
+				var trendData = '<table class="trend"><tr>';
+				for(var j=0;j < data.trends.length;j++) {
+					trendData += '<td><a href="'+data.trends[j].url+'">'+data.trends[j].name+'</a></td>';
+				}
+				trendData += '</tr></table>';
+				for (var i=0; i < safari.extension.bars.length; i++) {
+					bar = safari.extension.bars[i];
+					var trends = bar.contentWindow.document.querySelector('.trends');
+					$(trends).html(trendData);
+				}
+			}
+			function errorTrends(data) {
+				console.log('trend update failed. should handle this');
+			}
+			if(typeof Avian.responses.trends == 'object') {
+				var as_of = new Date(Avian.responses.trends.as_of);
+				var current = new Date();
+				if(current.getTime() - as_of.getTime() <= 1800) {
+					successTrends(Avian.responses.trends);
+				} else {
+					Avian.getTrends(successTrends,errorTrends);
+				}
+			} else {
+				Avian.getTrends(successTrends,errorTrends);
+			}
 		}
 
 		function destroyTweet(status_id) {

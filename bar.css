@@ -14,25 +14,33 @@ a {
 
 #box-container {
 	height: 30px;
-	margin-right: 90px;
+	margin-right: 96px;
 	-webkit-transform-style: preserve-3d;
 	-webkit-transition: -webkit-transform 1s;
 }
 
-.show-front {
-	-webkit-transform: translateZ(-15px) rotateX(0deg) ;
+.show-timeline {
+	-webkit-transform: translateZ(-26px) rotateX(0deg) ;
 }
 
-.show-top {
-	-webkit-transform: translateZ(-15px) rotateX(270deg);
+.show-create-tweet {
+	-webkit-transform: translateZ(-26px) rotateX(180deg);
 }
 
-.show-bottom {
-	-webkit-transform: translateZ(-15px) rotateX(90deg);
+.show-mentions {
+	-webkit-transform: translateZ(-26px) rotateX(60deg);
 }
 
-.show-back {
-	-webkit-transform: translateZ(-15px) rotateX(180deg);
+.show-dm {
+	-webkit-transform: translateZ(-26px) rotateX(120deg);
+}
+
+.show-search {
+	-webkit-transform: translateZ(-26px) rotateX(240deg);
+}
+
+.show-trends {
+	-webkit-transform: translateZ(-26px) rotateX(300deg);
 }
 
 .face {
@@ -45,19 +53,28 @@ a {
 	-webkit-transform-style: preserve-3d;
 	-webkit-backface-visibility: hidden;
 }
-.face.front {
-	-webkit-transform: translateZ(15px);
+.face.timeline {
+	-webkit-transform: translateZ(26px);
 }
-.face.top {
-	-webkit-transform: rotateX(90deg) translateZ(15px);
+.face.create-tweet {
+	-webkit-transform: rotateX(180deg) translateZ(26px);
 }
-.face.bottom {
-	-webkit-transform: rotateX(270deg) translateZ(15px);
+.face.mentions {
+	-webkit-transform: rotateX(300deg) translateZ(26px);
 }
-.face.back {
-	-webkit-transform: rotateX(180deg) translateZ(15px);
+.face.direct-messages {
+	-webkit-transform: rotateX(240deg) translateZ(26px);
+}
+.face.search {
+	-webkit-transform: rotateX(120deg) translateZ(26px);
+}
+.face.trends {
+	-webkit-transform: rotateX(60deg) translateZ(26px);
 }
 
+div.search {
+	background: -webkit-gradient(linear, left bottom, left top, color-stop(1, rgba(0,0,0, 0.1)), color-stop(0, rgba(255,255,255, 0.1)));
+}
 
 .tweet,.static-tweet {
 	display:inline-block;
@@ -113,7 +130,7 @@ img.avatar-retweet {
 	word-wrap:break-word;
 }
 
-.content a:hover {
+.content a:hover,.trend a:hover {
 	background-color: rgba(255,255,255,0.2);
 	color: rgb(0,0,100);
 }
@@ -178,7 +195,7 @@ img.avatar-retweet {
 
 #controls {
 	float:right;
-	width:90px;
+	width:94px;
 	text-align:right;
 	border-collapse:collapse;
 	padding:0;
@@ -267,4 +284,19 @@ img.avatar-retweet {
 	position:absolute;
 	left:50%;
 	top:25%;
+}
+
+table.trend {
+	width:100%;
+	height:100%;
+	border-collapse:collapse;
+}
+table.trend td {
+	background: -webkit-gradient(linear, left bottom, left top, color-stop(1, rgba(0,0,0, 0.1)), color-stop(0, rgba(255,255,255, 0.1)));
+	border-right:1px solid rgba(0,0,0,0.3);
+	text-align:center;
+}
+
+table.trend td:last-child {
+	border-right:none !important;
 }

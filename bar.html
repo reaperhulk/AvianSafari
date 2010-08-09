@@ -91,6 +91,7 @@ function checkAuthAndStatus() {
 			if(directMessagesSentLoaded == false && count.dm_sent > 0) {
 				g.populateSentDMBar(safari.self);
 			}
+			g.updateTrends();
 		}
 	} else {
 		$('#auth-status').show();
@@ -121,12 +122,16 @@ function replySetup(in_reply_to_status_id) {
 		var tweetHTML = g.generateTweetBody([data]);
 		var clonedTweet = $(tweetHTML);
 		clonedTweet.find('.options').remove();
+		clonedTweet.find('.overlay').remove();
+		var totalWidth = $('.create-tweet').width();
+		var currentEdge = $('.replying-to-tweet').position().left;
+		var availableSpace = totalWidth - currentEdge - 80; //70px is for avatar + padding in this case
 		clonedTweet.removeClass('tweet').addClass('static-tweet');
-		clonedTweet.find('.content').css('max-width','300px');
+		clonedTweet.find('.content').css('max-width',availableSpace);
 		$('.create-tweet .replying-to-tweet').empty().append(clonedTweet);
 		$('#controls button').removeClass('toggled');
 		$('#status-update').addClass('toggled');
-		document.querySelector('#box-container').className = 'show-top';
+		document.querySelector('#box-container').className = 'show-create-tweet';
 		window.setTimeout("var tweetText = $('.create-tweet .tweet-text');var range = tweetText.val().length;tweetText.get(0).setSelectionRange(range,range);tweetText.focus();",1000);
 	}
 }
@@ -148,7 +153,7 @@ function dmReplySetup(status_id) {
 		$('.create-tweet .replying-to-tweet').empty().append(clonedTweet);
 		$('#controls button').removeClass('toggled');
 		$('#status-update').addClass('toggled');
-		document.querySelector('#box-container').className = 'show-top';
+		document.querySelector('#box-container').className = 'show-create-tweet';
 		window.setTimeout("var tweetText = $('.create-tweet .tweet-text');var range = tweetText.val().length;tweetText.get(0).setSelectionRange(range,range);tweetText.focus();",1000);
 	}
 }
@@ -163,13 +168,13 @@ function numVisibleTweets(selector) {
 function getPageSelector() {
 	var selector;
 	switch (document.getElementById('box-container').className) {
-		case 'show-front':
+		case 'show-timeline':
 			selector = '.face.timeline';
 		break;
-		case 'show-bottom':
+		case 'show-mentions':
 			selector = '.face.mentions';
 		break;
-		case 'show-back':
+		case 'show-dm':
 			//DMs have two inside the one face. figure out which one is currently visible.
 			var toggled = document.getElementById('dm-received').className;
 			if (toggled == 'toggled') {
@@ -178,8 +183,14 @@ function getPageSelector() {
 				selector = '.direct-messages-sent';
 			}
 		break;
-		case 'show-top':
+		case 'show-create-tweet':
 			selector = '.face.create-tweet';
+		break;
+		case 'show-search':
+			selector = '.face.search';
+		break;
+		case 'show-trends':
+			selector = '.face.trends';
 		break;
 	}
 	return selector;
@@ -440,11 +451,26 @@ function showTweetFace() {
 	$('.create-tweet .replying-to-tweet').empty();
 	$('#controls button').removeClass('toggled');
 	$('#status-update').addClass('toggled');
-	document.querySelector('#box-container').className = 'show-top';
+	document.querySelector('#box-container').className = 'show-create-tweet';
 	window.setTimeout("$('.create-tweet .tweet-text').focus()",1000);
 }
 
 $(document).ready(function() {
+	$('#search-button').click(function() {
+		$('#controls button').removeClass('toggled');
+		$(this).addClass('toggled');
+		document.querySelector('#box-container').className = 'show-search';
+		window.setTimeout("$('#twitter-search input').focus()",1000);
+		return false;
+	});
+
+	$('#trends-button').click(function() {
+		$('#controls button').removeClass('toggled');
+		$(this).addClass('toggled');
+		document.querySelector('#box-container').className = 'show-trends';
+		return false;
+	});
+
 	$('#auth-status').click(function() {
 		var self = this;
 		$(this).html('Authorization in progress...');
@@ -470,7 +496,7 @@ $(document).ready(function() {
 		}
 		$('#controls button').removeClass('toggled');
 		$(this).addClass('toggled');
-		document.querySelector('#box-container').className = 'show-front';
+		document.querySelector('#box-container').className = 'show-timeline';
 		return false;
 	});
 
@@ -482,7 +508,7 @@ $(document).ready(function() {
 		$('#controls button').removeClass('toggled');
 		$(this).addClass('toggled');
 		var boxContainer = document.querySelector('#box-container');
-		boxContainer.className = 'show-bottom';
+		boxContainer.className = 'show-mentions';
 		return false;
 	});
 
@@ -494,12 +520,18 @@ $(document).ready(function() {
 		$('#controls button').removeClass('toggled');
 		$(this).addClass('toggled');
 		var boxContainer = document.querySelector('#box-container');
-		boxContainer.className = 'show-back';
+		boxContainer.className = 'show-dm';
 		return false;
 	});
 
 	$('#refresh').click(function() {
 		g.updateData();
+		return false;
+	});
+
+	$('#twitter-search').submit(function(event) {
+		var search = encodeURIComponent($('#twitter-search input').val());
+		followLink('http://search.twitter.com/search?q='+search);
 		return false;
 	});
 
@@ -549,7 +581,7 @@ $(document).ready(function() {
 			sendTweet($(this).val());
 			return false;
 		}
-		if(event.keyCode == 76 && event.metaKey == true && event.shiftKey == true) {
+		if(event.keyCode == 83 && event.metaKey == true && event.shiftKey == true) {
 			shortenLinks();
 			return false;
 		}
@@ -580,8 +612,7 @@ $(document).ready(function() {
 	});
 
 	$('div[type=tweet] .content,div[type=retweet] .content').live('click', function(event) {
-		var tweet = $(this).parent();
-		g.markTweetAsRead(tweet.attr('status_id'));
+		g.markTweetAsRead($(this).parents('.tweet').attr('status_id'));
 	});
 
 	$('div[type=dm] .content').live('click', function(event) {
@@ -681,7 +712,7 @@ $(document).ready(function() {
 		followLink(safari.extension.baseURI+'viewThread.html?status_id='+status_id);
 	});
 	
-	$('.tweet a').live('click',function() {
+	$('.tweet a,.trend a,.static-tweet a').live('click',function() {
 		followLink($(this).attr("href"));
 		/*
 		when clicking a link in the tweet div (be it @mention, #hashtag, url, or avatar), it's 
@@ -730,17 +761,18 @@ $(document).ready(function() {
 		<td><button id="mentions" title="View Mentions">@</button></td>
 		<td><button id="direct-messages" title="View Direct Messages"><img src="icons/direct_messages.png" style="width:10px;height:10px;margin-top:3px"/></button></td>
 		<td><button id="status-update" title="Compose Tweet">&#x270E;</button></td>
+		<td><button id="search-button" title="Search Twitter"><img src="icons/search.png" style="width:10px;height:10px;margin-top:3px"/></button></td>
 	</tr>
 	<tr>
 		<td><button id="refresh" title="Refresh"><img src="icons/refresh.png" style="width:10px;height:10px"/></button></td>
 		<td><button id="mark-all-as-read" title="Mark All As Read">&#x2714;</button></td>
 		<td><button id="prev-page" title="Previous Page">&#x2190;</button></td>
 		<td><button id="next-page" title="Next Page">&#x2192;</button></td>
+		<td><button id="trends-button" title="View Trending Topics">&#x2197;</button></td>
 		</tr>
 	</table>
-
-	<div id="box-container" class="show-front">
-		<div class="face front timeline">
+	<div id="box-container" class="show-timeline">
+		<div class="face timeline">
 			<div id="auth-status">
 				Authorization required. Click this bar to authorize.
 			</div>
@@ -748,12 +780,12 @@ $(document).ready(function() {
 				Loading Twitter Home Timeline...
 			</div>
 		</div>
-		<div class="face bottom mentions">
+		<div class="face mentions">
 			<div id="mentions-load">
 				Loading Twitter Mentions...
 			</div>
 		</div>
-		<div class="face back direct-messages">
+		<div class="face direct-messages">
 			<div class="direct-messages-received direct-messages">
 				<div id="dm-received-load">
 					Loading Received DMs...
@@ -769,22 +801,30 @@ $(document).ready(function() {
 				<button id="dm-received" class="toggled" title="Received DMs">&#x2193;</button>
 			</div>
 		</div>
-		<div class="face top create-tweet">
+		<div class="face create-tweet">
 			<div class="chars-left">140</div>
 			<img id="tweet-loading" src="icons/tweet-loading.gif" />
-			<form style="display:inline-block">
+			<form style="float:left;display:inline-block">
 				<input type="hidden" class="in_reply_to_status_id" name="in_reply_to_status_id" />
 				<textarea class="tweet-text"></textarea>
 			</form>
-			<div style="display:inline-block;vertical-align:top">
+			<div style="float:left;display:inline-block;vertical-align:top">
 				<button id="send-tweet" style="width:40px;padding:0" title="Send Tweet (&#x2318;&#x21a9;)">Send</button>
 				<br/>
-				<button id="shorten" style="width:50px;padding:0" title="Shorten Links (&#x21e7;&#x2318;L)">Shorten</button>
+				<button id="shorten" style="width:50px;padding:0" title="Shorten Links (&#x21e7;&#x2318;S)">Shorten</button>
 			</div>
-			<div style="display:inline-block;vertical-align:top">
+			<div style="float:left;display:inline-block;vertical-align:top;margin-right:10px">
 				<button id="get-current-link" style="width:20;padding:0" title="Insert Current Tab URL Into Tweet"><img src="icons/link.png" /></button>
 			</div>
-			<div style="float:right" class="replying-to-tweet"></div>
+			<div style="float:left" class="replying-to-tweet"></div>
+		</div>
+		<div class="face search">
+			<form id="twitter-search">
+			<input type="search" style="margin-top:5px;margin-left:5px;width:99%" results="10" placeholder="Enter your search term and hit enter" />
+			</form>
+		</div>
+		<div class="face trends">
+			Trends not yet loaded.
 		</div>
 	</div>
 </body>
