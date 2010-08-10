@@ -357,7 +357,7 @@ function shortenLinks() {
 			} else {
 				actualUrl = matches[j];
 			}
-			var userCreds;
+			var userCreds = '';
 			switch(safari.extension.settings.shortener) {
 				case 'tinyvh':
 					$.get('http://tinyvh.com/api.php?url='+encodeURIComponent(actualUrl),makeCallback(matches[j], tinySuccess));
