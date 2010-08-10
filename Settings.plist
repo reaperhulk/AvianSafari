@@ -45,6 +45,7 @@
 			<string>TinyURL</string>
 			<string>bit.ly</string>
 			<string>j.mp</string>
+			<string>is.gd</string>
 		</array>
 		<key>Type</key>
 		<string>PopUpButton</string>
@@ -54,6 +55,7 @@
 			<string>tinyurl</string>
 			<string>bitly</string>
 			<string>jmp</string>
+			<string>isgd</string>
 		</array>
 	</dict>
 	<dict>
