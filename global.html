@@ -30,7 +30,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 		var OAuth = new OAuth({oauth_consumer_secret:'QeVR9whib2JiVImPmOlVt8Kj7MHmmxxxYvhlO3TNcI',oauth_consumer_key:'IIwrpBcFc5yoJcITSavCA', oauth_token: safari.extension.secureSettings.oauth_token, oauth_token_secret: safari.extension.secureSettings.oauth_token_secret, log_to_console:false});
 
-		var Avian = new Avian({OAuth:OAuth,log_to_console:true,responses:safari.extension.settings.responses,metadata:safari.extension.settings.metadata,unreadTweets:safari.extension.settings.unreadTweets,unreadMentions:safari.extension.settings.unreadMentions,unreadDMs:safari.extension.settings.unreadDMs});
+		var Avian = new Avian({OAuth:OAuth,log_to_console:true,user_id:safari.extension.secureSettings.user_id,responses:safari.extension.settings.responses,metadata:safari.extension.settings.metadata,unreadTweets:safari.extension.settings.unreadTweets,unreadMentions:safari.extension.settings.unreadMentions,unreadDMs:safari.extension.settings.unreadDMs});
 		
 		var updateIntervalKey;
 		
@@ -53,6 +53,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 					safari.extension.secureSettings.oauth_token = data.oauth_token;
 					safari.extension.secureSettings.oauth_token_secret = data.oauth_token_secret;
 					safari.extension.secureSettings.user_id = data.user_id;
+					Avian.user_id = data.user_id;
 					//store other two settings?
 					console.log('successfully authenticated access token');
 					//going to active may not always work. maybe dispatch to all pages?

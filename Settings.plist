@@ -40,23 +40,23 @@
 	</dict>
 	<dict>
 		<key>DefaultValue</key>
-		<string>composeTweet</string>
+		<string>markAllAsRead</string>
 		<key>Key</key>
 		<string>toolbarButtonBehavior</string>
 		<key>Title</key>
 		<string>Toolbar Button Behavior</string>
 		<key>Titles</key>
 		<array>
-			<string>Show Compose Tweet</string>
 			<string>Mark All As Read</string>
+			<string>Show Compose Tweet</string>
 			<string>Show/Hide AvianSafari Toolbar (warning: visual glitches may occur)</string>
 		</array>
 		<key>Type</key>
 		<string>PopUpButton</string>
 		<key>Values</key>
 		<array>
-			<string>composeTweet</string>
 			<string>markAllAsRead</string>
+			<string>composeTweet</string>
 			<string>showHide</string>
 		</array>
 	</dict>

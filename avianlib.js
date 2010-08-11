@@ -33,6 +33,7 @@ function Avian(params) {
 	} else {
 		this.metadata = { tweets: {}, direct_messages: {} };
 	}
+	this.user_id = (params.user_id)?params.user_id:0;
 	//be careful that you provide these params as int and not string
 	this.unreadTweets = (params.unreadTweets)?params.unreadTweets:0;
 	this.unreadMentions = (params.unreadMentions)?params.unreadMentions:0;
@@ -231,6 +232,10 @@ Avian.prototype = {
 			if(typeof this.metadata.tweets[tweet.id] == 'undefined') {
 				this.metadata.tweets[tweet.id] = {unread:true};
 			}
+			if(this.user_id == tweet.user.id) {
+				//user_id matches, this tweet is from the auth'd user. mark as read.
+				this.metadata.tweets[tweet.id] = {unread:false};
+			} 
 		}
 	},
 	

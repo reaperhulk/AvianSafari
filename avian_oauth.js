@@ -176,25 +176,25 @@ OAuth.prototype = {
 		var baseString = this.buildSignatureBaseString(method,url,params);
 		this.signString(baseString);
 		var header = this.generateAuthorizationHeader();
-		var me = this;
+		var self = this;
 		
 		//default callback, used for request token/access token requests
 		if(typeof successCallback != 'function') {
 			successCallback = function(data, textStatus, xhr) {
-				me.logging('Default success callback, this is normally overridden.');
-				me.logging(textStatus);
-				me.logging(xhr);
-				me.logging('Raw callback data:');
-				me.logging(data);
+				self.logging('Default success callback, this is normally overridden.');
+				self.logging(textStatus);
+				self.logging(xhr);
+				self.logging('Raw callback data:');
+				self.logging(data);
 			};
 		}
 		if(typeof errorCallback != 'function') {
 			errorCallback = function(xhr, textStatus, errorThrown) {
-				me.logging('Default error callback, this is normally overridden.');
-				me.logging(textStatus);
-				me.logging(xhr);
-				me.logging('Error thrown:');
-				me.logging(errorThrown);
+				self.logging('Default error callback, this is normally overridden.');
+				self.logging(textStatus);
+				self.logging(xhr);
+				self.logging('Error thrown:');
+				self.logging(errorThrown);
 			};
 		}
 		$.ajax({
@@ -215,38 +215,38 @@ OAuth.prototype = {
 	will return an invalid signature.  unset it if you want to start over. (see Avian.getRequestToken)
 	*/
 	getToken: function(tokenUrl,method,params,userSuccessCallback,userErrorCallback) {
-		var me = this;
+		var self = this;
 		var successCallback = function(data, textStatus, xhr) {
 			if(xhr.status != 200) {
 				console.log('success fired but error really should have.');
 				console.log(xhr);
 			}
-			me.logging(textStatus);
-			me.logging(xhr);
-			me.logging('Raw callback data:');
-			me.logging(data);
+			self.logging(textStatus);
+			self.logging(xhr);
+			self.logging('Raw callback data:');
+			self.logging(data);
 			var dataArr = data.split("&");
 			var decoded = {};
 			for(var i=0;i < dataArr.length;i++) {
 				var split = decodeURIComponent(dataArr[i]).split("=");
 				decoded[split[0]] = split[1];
 			}
-			me.logging('Decoded callback data:');
-			me.logging(decoded);
-			me.oauth_token = decoded.oauth_token;
-			me.oauth_token_secret = decoded.oauth_token_secret;
-			if(dataArr.length == 4) {
-				me.user_id = decoded.user_id;
-				me.screen_name = decoded.screen_name;
-			}
+			self.logging('Decoded callback data:');
+			self.logging(decoded);
+			self.oauth_token = decoded.oauth_token;
+			self.oauth_token_secret = decoded.oauth_token_secret;
+			/*if(dataArr.length == 4) {
+				self.user_id = decoded.user_id;
+				self.screen_name = decoded.screen_name;
+			}*/
 			if(typeof userSuccessCallback == 'function') { userSuccessCallback(decoded); }
 		};
 		var errorCallback = function(xhr, textStatus, errorThrown) {
-			me.logging('Error...');
-			me.logging(textStatus);
-			me.logging(xhr);
-			me.logging('Error thrown:');
-			me.logging(errorThrown);
+			self.logging('Error...');
+			self.logging(textStatus);
+			self.logging(xhr);
+			self.logging('Error thrown:');
+			self.logging(errorThrown);
 			if(typeof userErrorCallback == 'function') { userErrorCallback(errorThrown); }
 		};
 		this.request(tokenUrl,method,params,successCallback,errorCallback);
