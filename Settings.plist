@@ -20,16 +20,44 @@
 		<key>Titles</key>
 		<array>
 			<string>1 Minute</string>
+			<string>2 Minutes</string>
 			<string>5 Minutes</string>
 			<string>10 Minutes</string>
+			<string>15 Minutes</string>
+			<string>30 Minutes</string>
 		</array>
 		<key>Type</key>
 		<string>PopUpButton</string>
 		<key>Values</key>
 		<array>
 			<real>1</real>
+			<real>2</real>
 			<real>5</real>
 			<real>10</real>
+			<real>15</real>
+			<real>30</real>
+		</array>
+	</dict>
+	<dict>
+		<key>DefaultValue</key>
+		<string>composeTweet</string>
+		<key>Key</key>
+		<string>toolbarButtonBehavior</string>
+		<key>Title</key>
+		<string>Toolbar Button Behavior</string>
+		<key>Titles</key>
+		<array>
+			<string>Show Compose Tweet</string>
+			<string>Mark All As Read</string>
+			<string>Show/Hide AvianSafari Toolbar (warning: visual glitches may occur)</string>
+		</array>
+		<key>Type</key>
+		<string>PopUpButton</string>
+		<key>Values</key>
+		<array>
+			<string>composeTweet</string>
+			<string>markAllAsRead</string>
+			<string>showHide</string>
 		</array>
 	</dict>
 	<dict>

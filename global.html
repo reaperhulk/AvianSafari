@@ -297,8 +297,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 			Avian.markAllDMsAsRead();
 			for (var i=0; i < safari.extension.bars.length; i++) {
 				bar = safari.extension.bars[i];
-				var timeline = bar.contentWindow.document.querySelector('.face');
-				$(timeline).find('.tweet .unread').remove();
+				var boxContainer = bar.contentWindow.document.querySelector('#box-container');
+				$(boxContainer).find('.tweet .unread').remove();
 			}
 			updateBadge();
 		}
