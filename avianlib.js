@@ -640,13 +640,11 @@ Avian.prototype = {
 	},
 
 	tweetInHomeTimeline: function(status_id) {
-		console.log('tweetInHomeTimeline'+status_id);
 		for(var i=0; i < this.responses.home_timeline.length; i++) {
 			if (this.responses.home_timeline[i].id == status_id) {
 				return true;
 			}
 		}
-		console.log('didnt find it');
 		return false;
 	},
 

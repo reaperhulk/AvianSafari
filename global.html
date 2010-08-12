@@ -95,9 +95,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 					safari.extension.secureSettings.oauth_token_secret = data.oauth_token_secret;
 					safari.extension.secureSettings.user_id = data.user_id;
 					Avian.user_id = data.user_id;
-					//store other two settings?
-					console.log('successfully authenticated access token');
-					//going to active may not always work. maybe dispatch to all pages?
 					event.target.page.dispatchMessage('aviansafari','success');
 					for(var i=0;i < safari.extension.bars.length;i++) {
 						safari.extension.bars[i].contentWindow.checkAuthAndStatus();
