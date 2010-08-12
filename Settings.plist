@@ -180,5 +180,35 @@
 			<string>end</string>
 		</array>
 	</dict>
+	<dict>
+		<key>Title</key>
+		<string>Developer Tools</string>
+		<key>Type</key>
+		<string>Group</string>
+	</dict>
+	<dict>
+		<key>DefaultValue</key>
+		<string>disabled</string>
+		<key>Key</key>
+		<string>logging</string>
+		<key>Title</key>
+		<string>Debug Logging</string>
+		<key>Titles</key>
+		<array>
+			<string>Disabled</string>
+			<string>Avian Logged</string>
+			<string>OAuth Logged</string>
+			<string>Full Logging</string>
+		</array>
+		<key>Type</key>
+		<string>PopUpButton</string>
+		<key>Values</key>
+		<array>
+			<string>disabled</string>
+			<string>avian</string>
+			<string>oauth</string>
+			<string>full</string>
+		</array>
+	</dict>
 </array>
 </plist>
