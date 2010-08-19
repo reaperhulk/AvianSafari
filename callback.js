@@ -1,6 +1,6 @@
 var handleMessage = function(event) {
 	if (event.name == 'aviansafari' && event.message == 'success') {
-		window.location.href = '/aviansafari/';
+		window.location.href = '/aviansafari/success.html';
 	}
 };
 console.log('i have been injected');
