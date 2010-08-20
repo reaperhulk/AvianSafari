@@ -80,6 +80,6 @@
 	<key>Update Manifest URL</key>
 	<string>http://langui.sh/extensions/AvianSafari-update.plist</string>
 	<key>Website</key>
-	<string>http://langui.sh</string>
+	<string>http://langui.sh/aviansafari</string>
 </dict>
 </plist>
