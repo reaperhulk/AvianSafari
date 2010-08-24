@@ -268,6 +268,7 @@ Avian.prototype = {
 		}
 		var self = this;
 		function homeTimelineSuccessCallback(parsedObj) {
+			parsedObj = parsedObj.filter(function(tweet) { return tweet !== null; });  //nuke any nulls that come back. this line was added in response to the null bug twitter had 8/24/10
 			//loop through the tweets, adding metadata for each one
 			self.addTweetMetadata(parsedObj);
 			//iterate over the metadata to see if all these new tweets have been read previously (perhaps as a mention)
@@ -308,6 +309,7 @@ Avian.prototype = {
 		}
 		var self = this;
 		function mentionsSuccessCallback(parsedObj) {
+			parsedObj = parsedObj.filter(function(tweet) { return tweet !== null; });  //nuke any nulls that come back. this line was added in response to the null bug twitter had 8/24/10
 			self.addTweetMetadata(parsedObj);
 			//iterate over the metadata to see if all these new tweets have been read previously (perhaps in home timeline)
 			var newUnreadMentions = 0;

@@ -30,6 +30,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 	<script src="sha1.js" type="text/javascript"></script>
 	<script src="avian_oauth.js" type="text/javascript"></script>
 	<script src="avianlib.js" type="text/javascript"></script>
+	<script src="avian_credentials.js" type="text/javascript"></script>
 	<script type="text/javascript">
 		var maxTweetsDisplayed = 50;
 		var oauth_log_to_console;
@@ -54,7 +55,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 				oauth_log_to_console = false;
 			break;
 		}
-		var OAuth = new OAuth({oauth_consumer_secret:'QeVR9whib2JiVImPmOlVt8Kj7MHmmxxxYvhlO3TNcI',oauth_consumer_key:'IIwrpBcFc5yoJcITSavCA', oauth_token: safari.extension.secureSettings.oauth_token, oauth_token_secret: safari.extension.secureSettings.oauth_token_secret, log_to_console:oauth_log_to_console});
+		var OAuth = new OAuth({oauth_consumer_secret:aviansafari_consumer_secret,oauth_consumer_key:aviansafari_consumer_key, oauth_token: safari.extension.secureSettings.oauth_token, oauth_token_secret: safari.extension.secureSettings.oauth_token_secret, log_to_console:oauth_log_to_console});
 
 		var Avian = new Avian({OAuth:OAuth,log_to_console:avian_log_to_console,user_id:safari.extension.secureSettings.user_id,responses:safari.extension.settings.responses,metadata:safari.extension.settings.metadata,unreadTweets:safari.extension.settings.unreadTweets,unreadMentions:safari.extension.settings.unreadMentions,unreadDMs:safari.extension.settings.unreadDMs});
 		
@@ -584,22 +585,25 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 			var tweetBody;
 			//we iterate only up to the limit we allow.
 			for (var i=0; i < limit; i++) {
-				var overlay = generateTweetOverlay(data[i]);
-				var returned = generateTweetInfo(data[i]);
-				var user = returned.user;
-				var type = returned.type;
-				var tweet = returned.tweet;
-				var status_id = returned.status_id;
-				var retweetAvatarOverlay = returned.retweetAvatarOverlay;
-				
-				var options = generateTweetOptions(type,user);
-				var unreadStatus = generateUnreadStatus(type,status_id);
-				
-				var escapedTweet = user.screen_name+': '+tweet.replace(/\"/g,'&quot;');
-				
-				tweet = generateTweetLinks(tweet,data[i].entities);
-				
-				tweetBody += '<div class="tweet" type="'+type+'" status_id="'+status_id+'" screen_name="'+user.screen_name+'"><div class="activity"><img src="icons/activity.gif" /></div>'+overlay+unreadStatus+retweetAvatarOverlay+'<a href="http://twitter.com/'+user.screen_name+'" title="'+user.screen_name+'"><img class="avatar" src="'+user.profile_image_url+'"/></a><div class="options">'+options+'</div><div class="content" title="'+escapedTweet+'">'+ tweet + '</div></div>';
+				//capture null elements and ignore them. code added due to twitterapi bug 8/24/10
+				if (data[i] !== null) {
+					var overlay = generateTweetOverlay(data[i]);
+					var returned = generateTweetInfo(data[i]);
+					var user = returned.user;
+					var type = returned.type;
+					var tweet = returned.tweet;
+					var status_id = returned.status_id;
+					var retweetAvatarOverlay = returned.retweetAvatarOverlay;
+
+					var options = generateTweetOptions(type,user);
+					var unreadStatus = generateUnreadStatus(type,status_id);
+
+					var escapedTweet = user.screen_name+': '+tweet.replace(/\"/g,'&quot;');
+
+					tweet = generateTweetLinks(tweet,data[i].entities);
+
+					tweetBody += '<div class="tweet" type="'+type+'" status_id="'+status_id+'" screen_name="'+user.screen_name+'"><div class="activity"><img src="icons/activity.gif" /></div>'+overlay+unreadStatus+retweetAvatarOverlay+'<a href="http://twitter.com/'+user.screen_name+'" title="'+user.screen_name+'"><img class="avatar" src="'+user.profile_image_url+'"/></a><div class="options">'+options+'</div><div class="content" title="'+escapedTweet+'">'+ tweet + '</div></div>';
+				}
 			}
 			return tweetBody;
 		}
