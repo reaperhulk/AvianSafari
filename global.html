@@ -57,15 +57,13 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 		}
 
 		//filter out any nulls currently stuck in the cache. added in response to 8/24/10 twitterapi bug
-		if(typeof safari.extension.settings.responses.home_timeline != 'undefined') {
+		try {
 			var responses = safari.extension.settings.responses;
 			responses.home_timeline = safari.extension.settings.responses.home_timeline.filter(function(tweet) { return tweet !== null; });
-			try {
-				responses.mentions = safari.extension.settings.responses.mentions.filter(function(tweet) { return tweet !== null; });
-			} catch(e) {}
+			responses.mentions = safari.extension.settings.responses.mentions.filter(function(tweet) { return tweet !== null; });
 			safari.extension.settings.responses = responses;
 			delete responses;
-		}
+		} catch(e) {}
 
 		var OAuth = new OAuth({oauth_consumer_secret:aviansafari_consumer_secret,oauth_consumer_key:aviansafari_consumer_key, oauth_token: safari.extension.secureSettings.oauth_token, oauth_token_secret: safari.extension.secureSettings.oauth_token_secret, log_to_console:oauth_log_to_console});
 
