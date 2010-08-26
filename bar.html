@@ -32,6 +32,7 @@ link icon from http://www.webdesignerdepot.com
 <script src="sha1.js" type="text/javascript"></script>
 <script src="avian_oauth.js" type="text/javascript"></script>
 <script src="avianlib.js" type="text/javascript"></script>
+<script src="avian_credentials.js" type="text/javascript"></script>
 <link rel="stylesheet" type="text/css" href="bar.css" />
 <link rel="stylesheet" type="text/css" href="button-styles.css" />
 <script type="text/javascript">
@@ -391,14 +392,14 @@ function shortenLinks() {
 				if(safari.extension.settings.x_login !== undefined && safari.extension.settings.x_apiKey !== undefined && safari.extension.settings.x_login.length > 0 && safari.extension.settings.x_apiKey.length > 0) {
 						userCreds = '&x_login='+safari.extension.settings.x_login+'&x_apiKey='+safari.extension.settings.x_apiKey;
 					}
-					$.get('http://api.bit.ly/v3/shorten?login=avian&apiKey=R_9dd7d08f62136c31e436639f6443ff76&format=json&longUrl='+encodeURIComponent(actualUrl)+userCreds,makeCallback(matches[j], bitlySuccess));
+					$.get('http://api.bit.ly/v3/shorten?login='+bitlyLogin+'&apiKey='+bitlyApiKey+'&format=json&longUrl='+encodeURIComponent(actualUrl)+userCreds,makeCallback(matches[j], bitlySuccess));
 				
 				break;
 				case 'jmp':
 				if(safari.extension.settings.x_login !== undefined && safari.extension.settings.x_apiKey !== undefined && safari.extension.settings.x_login.length > 0 && safari.extension.settings.x_apiKey.length > 0) {
 						userCreds = '&x_login='+safari.extension.settings.x_login+'&x_apiKey='+safari.extension.settings.x_apiKey;
 					}
-				$.get('http://api.j.mp/v3/shorten?login=avian&apiKey=R_9dd7d08f62136c31e436639f6443ff76&format=json&longUrl='+encodeURIComponent(actualUrl)+userCreds,makeCallback(matches[j], bitlySuccess));
+				$.get('http://api.j.mp/v3/shorten?login='+bitlyLogin+'&apiKey='+bitlyApiKey+'&format=json&longUrl='+encodeURIComponent(actualUrl)+userCreds,makeCallback(matches[j], bitlySuccess));
 				break;
 			}
 		}
