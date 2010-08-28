@@ -74,6 +74,7 @@
 			<string>bit.ly</string>
 			<string>j.mp</string>
 			<string>is.gd</string>
+			<string>Personal Shortener</string>
 		</array>
 		<key>Type</key>
 		<string>PopUpButton</string>
@@ -84,6 +85,7 @@
 			<string>bitly</string>
 			<string>jmp</string>
 			<string>isgd</string>
+			<string>lessnmore</string>
 		</array>
 	</dict>
 	<dict>
@@ -103,6 +105,28 @@
 	<dict>
 		<key>Key</key>
 		<string>x_apiKey</string>
+		<key>Title</key>
+		<string>API Key</string>
+		<key>Type</key>
+		<string>TextField</string>
+	</dict>
+	<dict>
+		<key>Title</key>
+		<string>Personal Shortener (http://lessnmore.net) (optional)</string>
+		<key>Type</key>
+		<string>Group</string>
+	</dict>
+	<dict>
+		<key>Key</key>
+		<string>lessnmore_url</string>
+		<key>Title</key>
+		<string>URL (Ex: domain.com/- )</string>
+		<key>Type</key>
+		<string>TextField</string>
+	</dict>
+	<dict>
+		<key>Key</key>
+		<string>lessnmore_api</string>
 		<key>Title</key>
 		<string>API Key</string>
 		<key>Type</key>

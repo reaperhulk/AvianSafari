@@ -388,6 +388,11 @@ function shortenLinks() {
 				case 'isgd':
 					$.get('http://is.gd/api.php?longurl='+encodeURIComponent(actualUrl),makeCallback(matches[j], tinySuccess));
 				break;
+				case 'lessnmore':
+				var lessnmore_url = safari.extension.settings.lessnmore_url;
+				var lessnmore_api = safari.extension.settings.lessnmore_api;
+					$.get('http://'+lessnmore_url+'/?api='+lessnmore_api+'&url='+encodeURIComponent(actualUrl),makeCallback(matches[j], tinySuccess));
+				break;
 				case 'bitly':
 				if(safari.extension.settings.x_login !== undefined && safari.extension.settings.x_apiKey !== undefined && safari.extension.settings.x_login.length > 0 && safari.extension.settings.x_apiKey.length > 0) {
 						userCreds = '&x_login='+safari.extension.settings.x_login+'&x_apiKey='+safari.extension.settings.x_apiKey;
