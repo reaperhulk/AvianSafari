@@ -431,6 +431,17 @@ function shortenLinks() {
 }
 
 function followLink(url) {
+	/*
+	this code will decode an IDN domain since there is a bug in Safari 5 with using the 
+	SafariBrowserTab.url property to redirect to IDN. remove when the bug is fixed.
+	rdar://8367696
+	*/
+	function resolveIDNA(url) {
+		var a = document.createElement("a");
+		a.href = url;
+		return a.href;
+	}
+	url = resolveIDNA(url);
 	switch(safari.extension.settings.linkBehavior) {
 		case 'newTab':
 			tabFocus = safari.extension.settings.tabFocus;
