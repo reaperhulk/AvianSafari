@@ -112,7 +112,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 					safari.extension.secureSettings.user_id = data.user_id;
 					Avian.user_id = data.user_id;
 					event.target.page.dispatchMessage('aviansafari','success');
-					for(var i=0;i < safari.extension.bars.length;i++) {
+					for (var i=0;i < safari.extension.bars.length;i++) {
 						safari.extension.bars[i].contentWindow.checkAuthAndStatus();
 					}
 					setUpdateInterval();
@@ -249,7 +249,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 		function updateTrends() {
 			function successTrends(data) {
 				var trendData = '<table class="trend"><tr>';
-				for(var j=0;j < data.trends.length;j++) {
+				for (var j=0;j < data.trends.length;j++) {
 					trendData += '<td><a href="'+data.trends[j].url+'">'+data.trends[j].name+'</a></td>';
 				}
 				trendData += '</tr></table>';
@@ -359,7 +359,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 		}
 		
 		function updateBadge() {
-			for(var i=0;i < safari.extension.toolbarItems.length;i++) {
+			for (var i=0;i < safari.extension.toolbarItems.length;i++) {
 				safari.extension.toolbarItems[i].badge = Avian.unreadTweets+Avian.unreadMentions+Avian.unreadDMs;
 				safari.extension.toolbarItems[i].toolTip = Avian.unreadTweets+' unread Tweets\n'+Avian.unreadMentions+' unread Mentions\n'+Avian.unreadDMs+' unread DMs';
 			}
