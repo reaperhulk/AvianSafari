@@ -28,9 +28,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 	<title>AvianSafari Global</title>
 	<script src="jquery-1.4.2.min.js" type="text/javascript"></script>
 	<script src="sha1.js" type="text/javascript"></script>
+	<script src="avian_credentials.js" type="text/javascript"></script>
 	<script src="avian_oauth.js" type="text/javascript"></script>
 	<script src="avianlib.js" type="text/javascript"></script>
-	<script src="avian_credentials.js" type="text/javascript"></script>
 	<script type="text/javascript">
 		var maxTweetsDisplayed = 50;
 		var oauth_log_to_console;
@@ -56,14 +56,17 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 			break;
 		}
 
-		//filter out any nulls currently stuck in the cache. added in response to 8/24/10 twitterapi bug
 		try {
-			var responses = safari.extension.settings.responses;
-			responses.home_timeline = safari.extension.settings.responses.home_timeline.filter(function(tweet) { return tweet !== null; });
-			responses.mentions = safari.extension.settings.responses.mentions.filter(function(tweet) { return tweet !== null; });
-			safari.extension.settings.responses = responses;
-			responses = null;
-		} catch(e) {}
+			if(safari.extension.settings.version != aviansafari_version) {
+				runUpgrade();
+				safari.extension.settings.version = aviansafari_version;
+			}
+		} catch(e) {
+			//no version means they're obviously out of date.
+			runUpgrade();
+			safari.extension.settings.version = aviansafari_version;
+		}
+
 
 		var OAuth = new OAuth({oauth_consumer_secret:aviansafari_consumer_secret,oauth_consumer_key:aviansafari_consumer_key, oauth_token: safari.extension.secureSettings.oauth_token, oauth_token_secret: safari.extension.secureSettings.oauth_token_secret, log_to_console:oauth_log_to_console});
 
@@ -72,7 +75,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 		var updateIntervalKey;
 		
 		safari.application.addEventListener("message",captureMessage,false);
-	    safari.application.addEventListener("validate", captureValidate, false);
+		safari.application.addEventListener("validate", captureValidate, false);
 		safari.extension.settings.addEventListener("change", settingChanged, false);
 
 		function settingChanged(event) {
@@ -142,6 +145,14 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 				return;
 			}
 			updateBadge();
+		}
+
+		function runUpgrade() {
+			//1.1.0
+			try {
+				//remove any tweets without id_str (pre-snowflake). we are going to use the "blunt hammer" method
+				delete safari.extension.settings.responses;
+			} catch(e) {}
 		}
 
 		function setUpdateInterval(minutes,reset) {
@@ -492,13 +503,13 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 					type = 'retweet';
 					user = obj.retweeted_status.user;
 					tweet = obj.retweeted_status.text;
-					status_id = obj.id; //this is the retweet id, do we want the original tweet id
+					status_id = obj.id_str; //this is the retweet id, do we want the original tweet id
 					retweetAvatarOverlay = '<a class="avatar-retweet" href="http://twitter.com/'+obj.user.screen_name+'" title="'+obj.user.screen_name+'"><img class="avatar-retweet" src="'+obj.user.profile_image_url+'" /></a>';
 				} else {
 					user = obj.user;
 					type = 'tweet';
 					tweet = obj.text;
-					status_id = obj.id;
+					status_id = obj.id_str;
 					retweetAvatarOverlay = '';
 				}
 			} else {
@@ -506,7 +517,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 				user = obj.sender;
 				type = 'dm';
 				tweet = obj.text;
-				status_id = obj.id;
+				status_id = obj.id_str;
 				retweetAvatarOverlay = '';
 			}
 			return {user: user, type: type, tweet: tweet, status_id: status_id, retweetAvatarOverlay: retweetAvatarOverlay};

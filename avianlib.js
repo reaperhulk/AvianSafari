@@ -38,7 +38,7 @@ function Avian(params) {
 	this.unreadTweets = (params.unreadTweets)?params.unreadTweets:0;
 	this.unreadMentions = (params.unreadMentions)?params.unreadMentions:0;
 	this.unreadDMs = (params.unreadDMs)?params.unreadDMs:0;
-	this.maxTweetsStored = 250; //configurable. how many do you want to keep around?
+	this.maxTweetsStored = 75; //configurable. how many do you want to keep around?
 	this.defaultNumTweetsRequested = 50; //default number to obtain for methods like getHomeTimeline
 
 	//for PATHS we track with a boolean whether auth is required, but we don't do anything with it
@@ -229,12 +229,12 @@ Avian.prototype = {
 		this.logging('adding tweet metadata');
 		for(var i=0;i < obj.length;i++) {
 			var tweet = obj[i];
-			if(typeof this.metadata.tweets[tweet.id] == 'undefined') {
-				this.metadata.tweets[tweet.id] = {unread:true};
+			if(typeof this.metadata.tweets[tweet.id_str] == 'undefined') {
+				this.metadata.tweets[tweet.id_str] = {unread:true};
 			}
 			if(this.user_id == tweet.user.id) {
 				//user_id matches, this tweet is from the auth'd user. mark as read.
-				this.metadata.tweets[tweet.id] = {unread:false};
+				this.metadata.tweets[tweet.id_str] = {unread:false};
 			} 
 		}
 	},
@@ -243,12 +243,12 @@ Avian.prototype = {
 		this.logging('adding DM metadata');
 		for(var i=0;i < obj.length;i++) {
 			var dm = obj[i];
-			if(typeof this.metadata.direct_messages[dm.id] == 'undefined') {
+			if(typeof this.metadata.direct_messages[dm.id_str] == 'undefined') {
 				if(sentReceived == 'received') {
-					this.metadata.direct_messages[dm.id] = {unread:true};
+					this.metadata.direct_messages[dm.id_str] = {unread:true};
 				} else {
 					//the user sent this so we don't want it to be unread...
-					this.metadata.direct_messages[dm.id] = {unread:false};
+					this.metadata.direct_messages[dm.id_str] = {unread:false};
 				}
 			}
 		}
@@ -258,7 +258,7 @@ Avian.prototype = {
 	getHomeTimeline : function(params,userSuccessCallback,userErrorCallback) {
 		//by default, get only the latest tweets
 		if(typeof this.responses.home_timeline != 'undefined' && typeof this.responses.home_timeline[0] != 'undefined' && typeof params.since_id == 'undefined') {
-			params.since_id = this.responses.home_timeline[0].id;
+			params.since_id = this.responses.home_timeline[0].id_str;
 		}
 		if(typeof params.count == 'undefined') {
 			params.count = this.defaultNumTweetsRequested;
@@ -274,7 +274,7 @@ Avian.prototype = {
 			//iterate over the metadata to see if all these new tweets have been read previously (perhaps as a mention)
 			var newUnreadTweets = 0;
 			for(var i=0;i < parsedObj.length;i++) {
-				if(self.metadata.tweets[parsedObj[i].id].unread == true) {
+				if(self.metadata.tweets[parsedObj[i].id_str].unread == true) {
 					newUnreadTweets++;
 				}
 			}
@@ -286,8 +286,8 @@ Avian.prototype = {
 				var removedTweets = self.responses['home_timeline'].splice(index,numToRemove);
 			
 				/*for(var j=0;j< removedTweets.length;j++) {
-					var id = removedTweets[j].id;
-					delete self.metadata.tweets[id]; //delete our metadata object for this tweet
+					var id = removedTweets[j].id_str;
+					delete self.metadata.tweets[id_str]; //delete our metadata object for this tweet
 				}*/
 			}
 			
@@ -299,7 +299,7 @@ Avian.prototype = {
 	getMentions : function(params,userSuccessCallback,userErrorCallback) {
 		//by default, get only the most recent mentions
 		if(typeof this.responses.mentions != 'undefined' &&typeof this.responses.mentions[0] != 'undefined' && typeof params.since_id == 'undefined') {
-			params.since_id = this.responses.mentions[0].id;
+			params.since_id = this.responses.mentions[0].id_str;
 		}
 		if(typeof params.count == 'undefined') {
 			params.count = this.defaultNumTweetsRequested;
@@ -314,7 +314,7 @@ Avian.prototype = {
 			//iterate over the metadata to see if all these new tweets have been read previously (perhaps in home timeline)
 			var newUnreadMentions = 0;
 			for(var i=0;i < parsedObj.length;i++) {
-				if(self.metadata.tweets[parsedObj[i].id].unread == true) {
+				if(self.metadata.tweets[parsedObj[i].id_str].unread == true) {
 					newUnreadMentions++;
 				}
 			}
@@ -337,7 +337,7 @@ Avian.prototype = {
 		var found = false;
 		if(typeof this.responses.home_timeline != 'undefined') {
 			for(var i=0;i < this.responses.home_timeline.length;i++) {
-				if(this.responses.home_timeline[i].id == status_id) {
+				if(this.responses.home_timeline[i].id_str == status_id) {
 					//okay we've already got the tweet. set the response object
 					//and call their success callback
 					this.responses.show = this.responses.home_timeline[i];
@@ -349,7 +349,7 @@ Avian.prototype = {
 		}
 		if(typeof this.responses.mentions != 'undefined' && found != true) {
 			for(var j=0;j < this.responses.mentions.length;j++) {
-				if(this.responses.mentions[j].id == status_id) {
+				if(this.responses.mentions[j].id_str == status_id) {
 					//okay we've already got the tweet. set the response object
 					//and call their success callback
 					this.responses.show = this.responses.mentions[j];
@@ -370,7 +370,7 @@ Avian.prototype = {
 			//rip it out of our timeline object
 			if(typeof self.responses.home_timeline != 'undefined') {
 				for(var i=0;i < self.responses.home_timeline.length;i++) {
-					if(self.responses.home_timeline[i].id == status_id) {
+					if(self.responses.home_timeline[i].id_str == status_id) {
 						self.arrayRemove(self.responses.home_timeline,i);
 						break;
 					}
@@ -389,12 +389,12 @@ Avian.prototype = {
 		this.responses.thread = [];
 		var self = this;
 		function successCallback(data) {
-			if(data.in_reply_to_status_id == null) {
+			if(data.in_reply_to_status_id_str == null) {
 				self.responses.thread.push(data);
 				if(typeof userSuccessCallback == 'function') { userSuccessCallback(self.responses.thread); }
 			} else {
 				self.responses.thread.push(data);
-				self.getTweet(data.in_reply_to_status_id,successCallback,errorCallback);
+				self.getTweet(data.in_reply_to_status_id_str,successCallback,errorCallback);
 			}
 		}
 		function errorCallback(errorThrown) {
@@ -421,7 +421,7 @@ Avian.prototype = {
 		}
 		//by default, get only the most recent
 		if(typeof this.responses[apiMethod] != 'undefined' && typeof params.since_id == 'undefined') {
-			params.since_id = this.responses[apiMethod][0].id;
+			params.since_id = this.responses[apiMethod][0].id_str;
 		}
 		if(typeof params.count == 'undefined') {
 			params.count = this.defaultNumTweetsRequested;
@@ -433,7 +433,7 @@ Avian.prototype = {
 			//iterate over the metadata to see if all these new DMs have been read previously
 			var newUnreadDMs = 0;
 			for(var i=0;i < parsedObj.length;i++) {
-				if(self.metadata.direct_messages[parsedObj[i].id].unread == true) {
+				if(self.metadata.direct_messages[parsedObj[i].id_str].unread == true) {
 					newUnreadDMs++;
 				}
 			}
@@ -470,7 +470,7 @@ Avian.prototype = {
 			var found = false;
 			if(typeof self.responses.direct_messages != 'undefined') {
 				for(var i=0;i < self.responses.direct_messages.length;i++) {
-					if(self.responses.direct_messages[i].id == status_id) {
+					if(self.responses.direct_messages[i].id_str == status_id) {
 						found = true;
 						self.arrayRemove(self.responses.direct_messages,i);
 						break;
@@ -479,7 +479,7 @@ Avian.prototype = {
 			}
 			if(typeof self.responses.dm_sent != 'undefined' && found != true) {
 				for(var j=0;j < self.responses.dm_sent.length;j++) {
-					if(self.responses.dm_sent[j].id == status_id) {
+					if(self.responses.dm_sent[j].id_str == status_id) {
 						found = true;
 						self.arrayRemove(self.responses.dm_sent,j);
 						break;
@@ -496,7 +496,7 @@ Avian.prototype = {
 		var found = false;
 		if(typeof this.responses.direct_messages != 'undefined') {
 			for(var i=0;i < this.responses.direct_messages.length;i++) {
-				if(this.responses.direct_messages[i].id == status_id) {
+				if(this.responses.direct_messages[i].id_str == status_id) {
 					if(typeof userSuccessCallback == 'function') { userSuccessCallback(this.responses.direct_messages[i]); }
 					found = true;
 					break;
@@ -505,7 +505,7 @@ Avian.prototype = {
 		}
 		if(typeof this.responses.dm_sent != 'undefined' && found != true) {
 			for(var j=0;j < this.responses.dm_sent.length;j++) {
-				if(this.responses.dm_sent[j].id == status_id) {
+				if(this.responses.dm_sent[j].id_str == status_id) {
 					if(typeof userSuccessCallback == 'function') { userSuccessCallback(this.responses.dm_sent[j]); }
 					break;
 				}
@@ -545,13 +545,13 @@ Avian.prototype = {
 		var self = this;
 		function createFavoriteSuccessCallback(parsedObj) {
 			/*for(var i=0;i < self.responses.home_timeline.length;i++) {
-				if(self.responses.home_timeline[i].id == status_id) {
+				if(self.responses.home_timeline[i].id_str == status_id) {
 					self.responses.home_timeline[i].favorited = true;
 					break;
 				}
 			}
 			for(var j=0;j < self.responses.mentions.length;i++) {
-				if(self.responses.mentions[i].id == status_id) {
+				if(self.responses.mentions[i].id_str == status_id) {
 					self.responses.mentions[i].favorited = true;
 					break;
 				}
@@ -565,13 +565,13 @@ Avian.prototype = {
 		var self = this;
 		function destroyFavoriteSuccessCallback(parsedObj) {
 			/*for(var i=0;i < self.responses.home_timeline.length;i++) {
-				if(self.responses.home_timeline[i].id == status_id) {
+				if(self.responses.home_timeline[i].id_str == status_id) {
 					self.responses.home_timeline[i].favorited = false;
 					break;
 				}
 			}
 			for(var j=0;j < self.responses.mentions.length;i++) {
-				if(self.responses.mentions[j].id == status_id) {
+				if(self.responses.mentions[j].id_str == status_id) {
 					self.responses.mentions[j].favorited = false;
 					break;
 				}
@@ -585,7 +585,7 @@ Avian.prototype = {
 	getFavorites : function(params,userSuccessCallback,userErrorCallback) {
 		//by default, get only the most recent favorites
 		if(typeof this.responses.favorites != 'undefined' &&typeof this.responses.favorites[0] != 'undefined' && typeof params.since_id == 'undefined') {
-			params.since_id = this.responses.favorites[0].id;
+			params.since_id = this.responses.favorites[0].id_str;
 		}
 		if(typeof params.count == 'undefined') {
 			params.count = this.defaultNumTweetsRequested;
@@ -643,7 +643,7 @@ Avian.prototype = {
 
 	tweetInHomeTimeline: function(status_id) {
 		for(var i=0; i < this.responses.home_timeline.length; i++) {
-			if (this.responses.home_timeline[i].id == status_id) {
+			if (this.responses.home_timeline[i].id_str == status_id) {
 				return true;
 			}
 		}
@@ -652,7 +652,7 @@ Avian.prototype = {
 
 	tweetInMentions: function(status_id) {
 		for(var i=0; i < this.responses.mentions.length; i++) {
-			if (this.responses.mentions[i].id == status_id) {
+			if (this.responses.mentions[i].id_str == status_id) {
 				return true;
 			}
 		}
