@@ -38,8 +38,8 @@ function Avian(params) {
 	this.unreadTweets = (params.unreadTweets)?params.unreadTweets:0;
 	this.unreadMentions = (params.unreadMentions)?params.unreadMentions:0;
 	this.unreadDMs = (params.unreadDMs)?params.unreadDMs:0;
-	this.maxTweetsStored = 75; //configurable. how many do you want to keep around?
-	this.defaultNumTweetsRequested = 50; //default number to obtain for methods like getHomeTimeline
+	this.maxTweetsStored = 30; //configurable. how many do you want to keep around?
+	this.defaultNumTweetsRequested = 30; //default number to obtain for methods like getHomeTimeline
 
 	//for PATHS we track with a boolean whether auth is required, but we don't do anything with it
 	this.PATHS = {
