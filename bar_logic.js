@@ -623,7 +623,7 @@ $(document).ready(function() {
 	$('.tweet').live('mouseenter mouseleave', function(event) {
 		var options = $(this).find('.options');
 		var content = $(this).find('.content');
-		if(event.type == 'mouseover') {
+		if(event.type == 'mouseenter') {
 			var totalWidth = $(this).parent().width();
 			var currentEdge = $(this).position().left + $(this).width();
 			
